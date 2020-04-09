@@ -10,35 +10,37 @@ int main(int argc, char *argv[])
     QCoreApplication a(argc, argv);
     QCommandLineParser parser;
     parser.addHelpOption();
-    parser.addPositionalArgument("prevFrame", "Previous input frame file path");
-    parser.addPositionalArgument("currFrame", "Input frame file path");
-    parser.addPositionalArgument("outfile", "Output frame file path");
-    parser.addPositionalArgument("keyframe", "Input keyframe");
-
-    parser.addPositionalArgument("args1", "respective argument for the method");
-    parser.addPositionalArgument("args2", "respective argument2 for the method");
-    parser.addPositionalArgument("args3", "respective argument3 for the method");
-    parser.addPositionalArgument("args4", "respective argument3 for the method");
+    parser.addPositionalArgument("inputDir", "File path to directory with input frames");
+    parser.addPositionalArgument("outputDir", "File path to directory for output frames");
+    parser.addPositionalArgument("keyframeDir", "File path to directory with keyframes");
+    parser.addPositionalArgument("begFrame", "Optional first frame in sequence");
+    parser.addPositionalArgument("endFrame", "Optional last frame in sequence");
 
     parser.process(a);
 
     const QStringList args = parser.positionalArguments();
-    if(args.size() != 4) {
+    if((args.size() != 3) && (args.size() != 5)) {
         cerr << "Error: Wrong number of arguments" << endl;
         a.exit(1);
         return 1;
     }
 
-    QString prevFrame = args[0];
-    QString currFrame = args[1];
-    QString outfile = args[2];
-    QString keyframe = args[3];
+    QString inputDir = args[0];
+    QString outputDir = args[1];
+    QString keyframeDir = args[2];
+    int begFrame;
+    int endFrame;
 
-    //Load frames from prevFrame.toStdString() and currFrame.toStdString()
-    //Load keyframe from keyframe.toStdString()
+    if (args.size == 5){
+        begFrame = args[3].toInt();
+        endFrame = arge[4].toInt();
+    }
+
+    //Load frames from inputDir.toStdString() + frame #
+    //Load keyframes from keyframeDir.toStdString() + keyframe #
 
 
-    //Save output frame to outfile.toStdString()
+    //Save output frame to outputDir.toStdString() + frame #
 
     a.exit();
 }
