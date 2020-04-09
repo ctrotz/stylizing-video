@@ -31,9 +31,9 @@ int main(int argc, char *argv[])
     int begFrame;
     int endFrame;
 
-    if (args.size == 5){
+    if (args.size() == 5){
         begFrame = args[3].toInt();
-        endFrame = arge[4].toInt();
+        endFrame = args[4].toInt();
     }
 
     //Load frames from inputDir.toStdString() + frame #
