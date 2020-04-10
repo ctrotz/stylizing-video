@@ -8,7 +8,7 @@ class Guide
 public:
     Guide();
 
-    virtual void apply();
+    virtual void apply() = 0;
 };
 
 #endif // GUIDE_H
