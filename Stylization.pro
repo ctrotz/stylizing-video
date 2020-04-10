@@ -19,5 +19,9 @@ QMAKE_CXXFLAGS += -msse2
 #QMAKE_CXXFLAGS += -fopenmp
 #LIBS += -fopenmp
 
-SOURCES += src/main.cpp
+SOURCES += src/main.cpp \
+    src/stylizer.cpp
 INCLUDEPATH += lib/
+
+HEADERS += \
+    src/stylizer.h
