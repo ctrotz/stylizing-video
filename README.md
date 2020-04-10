@@ -2,10 +2,10 @@
 ## Installation
 ### Requirements
 * Qt 5.2.0 or higher
-* [OpenCV 4.3.0](https://github.com/opencv/opencv/tree/4.3.0) + [OpenCV_Contrib](https://github.com/opencv/opencv_contrib)
+* [OpenCV 4.3.0](https://github.com/opencv/opencv/tree/4.3.0) + [opencv_contrib](https://github.com/opencv/opencv_contrib)
 
 ### Mac Installation
-Install both OpenCV 4.3.0 and OpenCV_Contrib from source, making sure to link them at build time by passing in
+Install both OpenCV 4.3.0 and opencv_contrib from source, making sure to link them at build time by passing in
 ```
 cmake -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules <opencv_source_directory>
 ```
