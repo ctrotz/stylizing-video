@@ -2,12 +2,13 @@
 #define STYLIZER_H
 
 #include "QImage"
+#include <memory>
 
 class Stylizer {
 public:
     Stylizer();
 private:
-    void generateGuides(QImage keyFrame, QImage prevFrame, QImage currFrame);
+    void generateGuides(std::shared_ptr<QImage> keyFrame, std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame);
 };
 
 
