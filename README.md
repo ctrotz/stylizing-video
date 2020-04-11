@@ -11,6 +11,16 @@ cmake -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules <opencv_source_direct
 ```
 These should be installed to `/usr/local` to link properly with this project.
 
+We recommend the following workflow:
+1. Clone both repositories to the `deps/` directory.
+2. Create a `build` directory in the cloned `opencv` repo. 
+3. Run 
+```
+cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ..
+make -j4
+make install
+```
+4. All set!
 
 ## Citations
 Ondřej Jamriška, Šárka Sochorová, Ondřej Texler, Michal Lukáč, Jakub Fišer, Jingwan Lu, Eli Shechtman, and Daniel Sýkora. 2019.
