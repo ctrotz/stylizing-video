@@ -1,10 +1,8 @@
 QT += gui
 QT += xml
 
-CONFIG += c++1z console
+CONFIG += c++1Z console
 CONFIG -= app_bundle
-
-QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings

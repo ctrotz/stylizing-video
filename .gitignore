@@ -38,4 +38,6 @@
 Makefile
 compile_commands.json
 *.user
+*.user*
 Stylization
+output/
