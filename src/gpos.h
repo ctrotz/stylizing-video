@@ -3,11 +3,12 @@
 
 #include "guide.h"
 #include <QObject>
+#include <memory>
 
 class GPos : public Guide
 {
 public:
-    GPos(QImage *prevFrame, QImage *currFrame, QImage *g_mask);
+    GPos(std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> g_mask);
     virtual ~GPos();
 
 protected:

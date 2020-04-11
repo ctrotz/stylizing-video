@@ -1,6 +1,6 @@
 #include "gedge.h"
 
-GEdge::GEdge(QImage *currFrame) :
+GEdge::GEdge(std::shared_ptr<QImage> currFrame) :
     Guide(currFrame),
     m_guide(nullptr)
 {
@@ -11,10 +11,10 @@ GEdge::~GEdge(){
     m_guide = nullptr;
 }
 
-QImage* GEdge::getGuide(){
+std::shared_ptr<QImage> GEdge::getGuide(){
     return m_guide;
 }
 
-void GEdge::createEdge(QImage *currFrame){
+void GEdge::createEdge(std::shared_ptr<QImage> currFrame){
     m_guide = currFrame; //placeholder
 }

@@ -7,15 +7,15 @@
 class GEdge : public Guide
 {
 public:
-    GEdge(QImage *currFrame);
+    GEdge(std::shared_ptr<QImage> currFrame);
     virtual ~GEdge();
 
 protected:
-    QImage* getGuide();
+    std::shared_ptr<QImage> getGuide();
 
 private:
-    QImage* m_guide;
-    void createEdge(QImage *currFrame);
+    std::shared_ptr<QImage> m_guide;
+    void createEdge(std::shared_ptr<QImage> currFrame);
 };
 
 #endif // GEDGE_H

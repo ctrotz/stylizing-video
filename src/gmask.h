@@ -7,16 +7,16 @@
 class GMask : public Guide
 {
 public:
-    GMask(QImage *currFrame);
+    GMask(std::shared_ptr<QImage> currFrame);
     virtual ~GMask();
 
 protected:
-    QImage* getGuide();
-    void setMask(QImage *mask); //for user-provided masks
+    std::shared_ptr<QImage> getGuide();
+    void setMask(std::shared_ptr<QImage> mask); //for user-provided masks
 
 private:
-    QImage* m_mask;
-    void createMask(QImage *currFrame);
+    std::shared_ptr<QImage> m_mask;
+    void createMask(std::shared_ptr<QImage> currFrame);
 };
 
 #endif // GMASK_H

@@ -8,12 +8,12 @@ class Guide
 {
 public:
     Guide();
-    Guide(QImage *currFrame);
+    Guide(std::shared_ptr<QImage> currFrame);
 
     virtual ~Guide();
 
 protected:
-    virtual QImage* getGuide() = 0;
+    virtual std::shared_ptr<QImage> getGuide() = 0;
 };
 
 #endif // GUIDE_H

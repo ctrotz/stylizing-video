@@ -1,6 +1,6 @@
 #include "gtemp.h"
 
-GTemp::GTemp(QImage *prevFrame, QImage *currFrame, QImage *keyFrame, QImage *motionField, QImage *prevOut) :
+GTemp::GTemp(std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> keyFrame, std::shared_ptr<QImage> motionField, std::shared_ptr<QImage> prevOut) :
     Guide(currFrame),
     m_guide(nullptr)
 {
@@ -11,7 +11,7 @@ GTemp::~GTemp(){
     m_guide = nullptr;
 }
 
-QImage* GTemp::getGuide(){
+std::shared_ptr<QImage> GTemp::getGuide(){
     return m_guide;
 }
 

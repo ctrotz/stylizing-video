@@ -7,14 +7,14 @@
 class GTemp : public Guide
 {
 public:
-    GTemp(QImage *prevFrame, QImage *currFrame, QImage *keyFrame, QImage *motionField, QImage *prevOut);
+    GTemp(std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> keyFrame, std::shared_ptr<QImage> motionField, std::shared_ptr<QImage> prevOut);
     virtual ~GTemp();
 
 protected:
-    QImage* getGuide();
+    std::shared_ptr<QImage> getGuide();
 
 private:
-    QImage* m_guide;
+    std::shared_ptr<QImage> m_guide;
     void createTemp();
 };
 
