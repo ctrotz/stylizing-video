@@ -30,14 +30,16 @@
 *.exe
 *.out
 *.app
+Stylization
 
 .DS_Store
 
-.clangd/
-.qmake.stash
-Makefile
-compile_commands.json
 *.user
 *.user*
-Stylization
+*.stash
+
+Makefile
+compile_commands.json
+.clangd/
+
 output/
