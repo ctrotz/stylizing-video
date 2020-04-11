@@ -12,12 +12,12 @@ public:
     virtual ~GPos();
 
 protected:
-    QImage* getGuide();
-    QImage* getMotion(); //for G_temp
+    std::shared_ptr<QImage> getGuide();
+    std::shared_ptr<QImage> getMotion(); //for G_temp
 
 private:
-    QImage* m_guide;
-    QImage* m_motion;
+    std::shared_ptr<QImage> m_guide;
+    std::shared_ptr<QImage> m_motion;
 
     void createPos();
 };
