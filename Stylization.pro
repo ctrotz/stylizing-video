@@ -24,7 +24,7 @@ SOURCES += src/main.cpp \
     src/gedge.cpp \
     src/gmask.cpp \
     src/gpos.cpp \
-    src/gtemp.cpp
+    src/gtemp.cpp \
     src/stylizer.cpp
 
 HEADERS += src/guide.h \
