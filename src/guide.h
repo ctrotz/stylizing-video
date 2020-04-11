@@ -2,13 +2,18 @@
 #define GUIDE_H
 
 #include <Eigen/Dense>
+#include <QObject>
 
 class Guide
 {
 public:
     Guide();
+    Guide(QImage *currFrame);
 
-    virtual void apply();
+    virtual ~Guide();
+
+protected:
+    virtual QImage* getGuide() = 0;
 };
 
 #endif // GUIDE_H
