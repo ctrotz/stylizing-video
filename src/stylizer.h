@@ -3,6 +3,12 @@
 
 #include "QImage"
 
-void generateGuides(QImage keyFrame, QImage prevFrame, QImage currFrame);
+class Stylizer {
+public:
+    Stylizer();
+private:
+    void generateGuides(QImage keyFrame, QImage prevFrame, QImage currFrame);
+};
+
 
 #endif // STYLIZER_H
