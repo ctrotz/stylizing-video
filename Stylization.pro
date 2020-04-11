@@ -20,17 +20,19 @@ QMAKE_CXXFLAGS += -msse2
 #LIBS += -fopenmp
 
 SOURCES += src/main.cpp \
-src/guide.cpp \
+    src/guide.cpp \
     src/gedge.cpp \
     src/gmask.cpp \
     src/gpos.cpp \
     src/gtemp.cpp
+    src/stylizer.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
     src/gmask.h \
     src/gpos.h \
-    src/gtemp.h
+    src/gtemp.h \
+    src/stylizer.h
 
 INCLUDEPATH += lib/
 macx {
