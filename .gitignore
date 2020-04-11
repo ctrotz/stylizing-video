@@ -33,3 +33,6 @@
 
 .DS_Store
 
+*.user
+*.stash
+

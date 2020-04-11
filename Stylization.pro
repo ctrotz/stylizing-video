@@ -1,7 +1,7 @@
 QT += gui
 QT += xml
 
-CONFIG += c++11 console
+CONFIG += c++1Z console
 CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
@@ -20,8 +20,37 @@ QMAKE_CXXFLAGS += -msse2
 #LIBS += -fopenmp
 
 SOURCES += src/main.cpp \
+    src/guide.cpp \
+    src/gedge.cpp \
+    src/gmask.cpp \
+    src/gpos.cpp \
+    src/gtemp.cpp
     src/stylizer.cpp
-INCLUDEPATH += lib/
 
-HEADERS += \
+HEADERS += src/guide.h \
+    src/gedge.h \
+    src/gmask.h \
+    src/gpos.h \
+    src/gtemp.h \
     src/stylizer.h
+
+INCLUDEPATH += lib/
+macx {
+    INCLUDEPATH += /usr/local/include/opencv4
+    LIBS += -L/usr/local/lib/\
+     -lopencv_calib3d.4.3.0\
+     -lopencv_core.4.3.0\
+     -lopencv_features2d.4.3.0 \
+     -lopencv_flann.4.3.0\
+     -lopencv_highgui.4.3.0\
+     -lopencv_imgproc.4.3.0\
+     -lopencv_ml.4.3.0\
+     -lopencv_objdetect.4.3.0\
+     -lopencv_photo.4.3.0\
+     -lopencv_stitching.4.3.0\
+     -lopencv_superres.4.3.0\
+     -lopencv_video.4.3.0\
+     -lopencv_videostab.4.3.0
+
+    DEPENDPATH += /usr/local/include/opencv4
+}
