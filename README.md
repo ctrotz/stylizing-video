@@ -13,7 +13,7 @@ These should be installed to `/usr/local` to link properly with this project.
 
 We recommend the following workflow:
 1. Clone both repositories to the `deps/` directory.
-2. Create a `build` directory in the cloned `opencv` repo. 
+2. Create a `build` directory in the cloned `opencv` repo and `cd` into it. 
 3. Run 
 ```
 cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ..
