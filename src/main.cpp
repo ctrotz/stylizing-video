@@ -1,8 +1,14 @@
 #include <QCoreApplication>
 #include <QCommandLineParser>
+#include <QImage>
 
+#include <unistd.h>
 #include <iostream>
+#include <filesystem>
 #include <Eigen/Core>
+
+#include "iohandler.h"
+
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -21,6 +27,7 @@ int main(int argc, char *argv[])
     const QStringList args = parser.positionalArguments();
     if((args.size() != 3) && (args.size() != 5)) {
         cerr << "Error: Wrong number of arguments" << endl;
+        parser.showHelp();
         a.exit(1);
         return 1;
     }
@@ -28,19 +35,29 @@ int main(int argc, char *argv[])
     QString inputDir = args[0];
     QString outputDir = args[1];
     QString keyframeDir = args[2];
-    int begFrame;
-    int endFrame;
+    int begFrame = -1;
+    int endFrame = -1;
 
     if (args.size() == 5){
         begFrame = args[3].toInt();
         endFrame = args[4].toInt();
     }
 
-    //Load frames from inputDir.toStdString() + frame #
-    //Load keyframes from keyframeDir.toStdString() + keyframe #
+    // Check arguments' validity
+    if (begFrame > endFrame) {
+        cerr << "Error: Beginning frame comes after end frame." << endl;
+        a.exit(1);
+        return 1;
+    }
 
+    IOHandler ioHandler(begFrame, endFrame, inputDir, keyframeDir, outputDir);
 
-    //Save output frame to outputDir.toStdString() + frame #
+    vector<QImage> inputFrames;
+    vector<QImage> keyframes;
+
+    ioHandler.loadInputData(inputFrames, keyframes);
+
+    ioHandler.exportFrames(inputFrames);
 
     a.exit();
 }
