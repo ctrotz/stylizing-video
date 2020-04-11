@@ -19,10 +19,19 @@ QMAKE_CXXFLAGS += -msse2
 #QMAKE_CXXFLAGS += -fopenmp
 #LIBS += -fopenmp
 
-HEADERS +=  src/guide.h
+SOURCES += src/main.cpp \
+src/guide.cpp \
+    src/gedge.cpp \
+    src/gmask.cpp \
+    src/gpos.cpp \
+    src/gtemp.cpp
 
-SOURCES += src/guide.cpp \
-    src/main.cpp
+HEADERS += src/guide.h \
+    src/gedge.h \
+    src/gmask.h \
+    src/gpos.h \
+    src/gtemp.h
+
 INCLUDEPATH += lib/
 macx {
     INCLUDEPATH += /usr/local/include/opencv4
