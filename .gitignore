@@ -43,3 +43,6 @@ compile_commands.json
 .clangd/
 
 output/
+
+deps/opencv/
+deps/opencv_contrib/

@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 
     ioHandler.loadInputData(inputFrames, keyframes);
 
-    ioHandler.exportFrames(inputFrames);
+    ioHandler.exportAllFrames(inputFrames);
 
     a.exit();
 }

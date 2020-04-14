@@ -12,11 +12,22 @@ public:
               QString keyframesDir, QString outputDir);
 
     void loadInputData(std::vector<QImage>& inputFrames, std::vector<QImage>& keyframes);
-    void exportFrames(std::vector<QImage>& images);
-    void exportFrames(std::vector<QImage>& images, QDir outputDir);
+
+	void exportImages(const std::vector<QImage>& images,
+		              const QDir outputDir);
+	void exportImages(const std::vector<QImage>& images, 
+					  const QDir outputDir,
+					  const std::vector<QString>& filenames);
+
+    void exportAllFrames(const std::vector<QImage>& images);
+    void exportAllFrames(const std::vector<QImage>& images, const QDir outputDir);
+
+	int getKeyframeNum(int keyframeIdx);
+	std::vector<int> getKeyframeNums();
 
 private:
-    void getImageFilepaths();
+    void collectImageFilepaths();
+	int calcNumDigits(int num);
 
     int _begFrame;
     int _endFrame;
@@ -25,6 +36,8 @@ private:
     QDir _outputDir;
     std::vector<QString> _inputFramePaths;
     std::vector<QString> _keyframePaths;
+	std::vector<int> _inputFrameNums;
+	std::vector<int> _keyframeNums;
 };
 
 #endif // IOHANDLER_H
