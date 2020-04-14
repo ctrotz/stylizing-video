@@ -22,7 +22,9 @@ public:
     void exportAllFrames(const std::vector<QImage>& images);
     void exportAllFrames(const std::vector<QImage>& images, const QDir outputDir);
 
+	int getInputFrameNum(int frameIdx);
 	int getKeyframeNum(int keyframeIdx);
+	std::vector<int> getInputFrameNums();
 	std::vector<int> getKeyframeNums();
 
 private:

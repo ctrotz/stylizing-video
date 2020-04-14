@@ -170,6 +170,18 @@ void IOHandler::exportAllFrames(const std::vector<QImage>& images, const QDir ou
     exportImages(images, outputDir, filenames);
 }
 
+// Get the frame number associated to the input frame at index frameIdx
+int IOHandler::getInputFrameNum(int frameIdx)
+{
+    return _inputFrameNums.at(frameIdx);
+}
+
+// Get vector of all frame numbers associated to the input frames
+std::vector<int> IOHandler::getInputFrameNums()
+{
+    return _inputFrameNums;
+}
+
 // Get the frame number associated to the keyframe at index keyframeIdx
 int IOHandler::getKeyframeNum(int keyframeIdx)
 {
