@@ -28,11 +28,14 @@ make install
 We generate inter-image optical flow-based vector fields that encode the velocity of pixels
 between images using SimpleFlow from opencv_contrib. We present below vector fields generated on our test set.
 
-* Vector field from image to image encoded as HSV images:
+* Vector field from image to image encoded as HSV images:  
+
 ![Cat optical flow in HSV](https://media.giphy.com/media/dxHtk041o3VlaS8NCL/giphy.gif)
-* Scalar vx field encoded as grayscale:
+* Scalar vx field encoded as grayscale:  
+
 ![Cat vx in gray](https://media.giphy.com/media/mBeo1ENx26fvTFIr9H/giphy.gif)
-* Scalar vy field encoded as grayscale:
+* Scalar vy field encoded as grayscale:  
+
 ![Cat vy in gray](https://media.giphy.com/media/mFl7l8vvtbO2cR3aw7/giphy.gif)
 
 
