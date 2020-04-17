@@ -26,7 +26,8 @@ SOURCES += src/main.cpp \
     src/gpos.cpp \
     src/gtemp.cpp \
     src/stylizer.cpp \
-    src/iohandler.cpp
+    src/iohandler.cpp \
+    src/opencvutils.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
@@ -34,7 +35,9 @@ HEADERS += src/guide.h \
     src/gpos.h \
     src/gtemp.h \
     src/stylizer.h \
-    src/iohandler.h
+    src/iohandler.h \
+    src/optical-flow/simpleflow.h \
+    src/opencvutils.h
 
 INCLUDEPATH += lib/
 macx {
@@ -52,7 +55,10 @@ macx {
      -lopencv_stitching.4.3.0\
      -lopencv_superres.4.3.0\
      -lopencv_video.4.3.0\
-     -lopencv_videostab.4.3.0
+     -lopencv_videostab.4.3.0\
+     -lopencv_imgcodecs.4.3.0\
+      -lopencv_optflow.4.3.0
+
 
     DEPENDPATH += /usr/local/include/opencv4
 }
