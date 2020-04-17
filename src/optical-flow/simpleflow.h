@@ -10,7 +10,7 @@
 #include <iostream>
 
 using namespace cv;
-Mat calculateFlow(const Mat& i1, const Mat& i2) {
+Mat calculateFlow(const Mat& i1, const Mat& i2, bool retColor = false,  bool imshowFlag = false) {
 
     namedWindow("flow");
     Mat flow;
@@ -60,9 +60,15 @@ Mat calculateFlow(const Mat& i1, const Mat& i2) {
     //convert to BGR and show
     Mat bgr;//CV_32FC3 matrix
     cvtColor(hsv, bgr, COLOR_HSV2BGR);
-//    imshow("flow", bgr);
-//    waitKey(0);
-    return bgr;
+    if (imshowFlag) {
+        imshow("flow", bgr);
+        waitKey(0);
+    }
+    if (retColor) {
+        return bgr;
+    } else {
+        return flow;
+    }
 }
 
 #endif // SIMPLEFLOW_H

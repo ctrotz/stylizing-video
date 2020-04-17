@@ -55,19 +55,18 @@ int main(int argc, char *argv[])
 
     IOHandler ioHandler(begFrame, endFrame, inputDir, keyframeDir, outputDir);
 
-    vector<QImage> inputFrames;
-    vector<QImage> keyframes;
+    vector<std::shared_ptr<QImage>> inputFrames;
+    vector<std::shared_ptr<QImage>> keyframes;
 
     ioHandler.loadInputData(inputFrames, keyframes);
-
 
     Mat i1, i2, out;
     Mat xy[2];
     Mat vx;
     Mat vy;
     for (int i = 0; i < inputFrames.size() - 1; i++) {
-        i1 = qimage_to_mat_ref(inputFrames.at(i), CV_8UC3);
-        i2 = qimage_to_mat_ref(inputFrames.at(i + 1), CV_8UC3);
+        i1 = qimage_to_mat_ref((*inputFrames.at(i)), CV_8UC3);
+        i2 = qimage_to_mat_ref((*inputFrames.at(i + 1)), CV_8UC3);
         std::cout << "flow #" << to_string(i) <<  " calculated" << std::endl;
         out = calculateFlow(i1, i2);
         std::cout << "mat type: " << type2str(out.type()) << std::endl;
@@ -82,8 +81,7 @@ int main(int argc, char *argv[])
         imwrite(outputDir.toStdString() + "/flow_vy" + to_string(i) +  ".jpg", vy);
 
     }
-
-
+    ioHandler.exportAllFrames(inputFrames);
 
     a.exit();
 
