@@ -11,16 +11,17 @@ public:
     IOHandler(int begFrame, int endFrame, QString inputFramesDir,
               QString keyframesDir, QString outputDir);
 
-    void loadInputData(std::vector<QImage>& inputFrames, std::vector<QImage>& keyframes);
+    void loadInputData(std::vector<std::shared_ptr<QImage>>& inputFrames,
+			           std::vector<std::shared_ptr<QImage>>& keyframes);
 
-	void exportImages(const std::vector<QImage>& images,
+	void exportImages(const std::vector<std::shared_ptr<QImage>>& images,
 		              const QDir outputDir);
-	void exportImages(const std::vector<QImage>& images, 
+	void exportImages(const std::vector<std::shared_ptr<QImage>>& images, 
 					  const QDir outputDir,
 					  const std::vector<QString>& filenames);
 
-    void exportAllFrames(const std::vector<QImage>& images);
-    void exportAllFrames(const std::vector<QImage>& images, const QDir outputDir);
+    void exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images);
+    void exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images, const QDir outputDir);
 
 	int getInputFrameNum(int frameIdx);
 	int getKeyframeNum(int keyframeIdx);

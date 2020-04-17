@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
 
     IOHandler ioHandler(begFrame, endFrame, inputDir, keyframeDir, outputDir);
 
-    vector<QImage> inputFrames;
-    vector<QImage> keyframes;
+    vector<std::shared_ptr<QImage>> inputFrames;
+    vector<std::shared_ptr<QImage>> keyframes;
 
     ioHandler.loadInputData(inputFrames, keyframes);
 

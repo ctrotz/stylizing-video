@@ -73,22 +73,23 @@ void IOHandler::collectImageFilepaths()
 }
 
 // Loads input frames and keyframes into the provided vectors.
-void IOHandler::loadInputData(std::vector<QImage>& inputFrames, std::vector<QImage>& keyframes)
+void IOHandler::loadInputData(std::vector<std::shared_ptr<QImage>>& inputFrames,
+		                      std::vector<std::shared_ptr<QImage>>& keyframes)
 {
     // Import input frames
     for (QString inputFramePath : _inputFramePaths) {
-        inputFrames.push_back(QImage(inputFramePath));
+        inputFrames.push_back(std::shared_ptr<QImage>(new QImage(inputFramePath)));
     }
 
     // Import keyframes
     for (QString keyframePath : _keyframePaths) {
-        keyframes.push_back(QImage(keyframePath));
+        keyframes.push_back(std::shared_ptr<QImage>(new QImage(keyframePath)));
     }
 }
 
 // Defaults to using the index of the image in "images" as the
 // the filename of the exported image.
-void IOHandler::exportImages(const std::vector<QImage>& images,
+void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,
                              const QDir outputDir)
 {
     int padSize = calcNumDigits(images.size());
@@ -107,7 +108,7 @@ void IOHandler::exportImages(const std::vector<QImage>& images,
 }
 
 // General exporting method for images
-void IOHandler::exportImages(const std::vector<QImage>& images, 
+void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images, 
                              const QDir outputDir,
                              const std::vector<QString>& filenames)
 {
@@ -128,20 +129,20 @@ void IOHandler::exportImages(const std::vector<QImage>& images,
         filename.append(".jpg");
         outPath = outPath.append("/").append(filename);
 
-        images.at(i).save(outPath, "JPG");
+        images.at(i)->save(outPath, "JPG");
     }
 }
 
 
 // Defaults to using _outputDir as the output directory.
-void IOHandler::exportAllFrames(const std::vector<QImage>& images)
+void IOHandler::exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images)
 {
     exportAllFrames(images, _outputDir);
 }
 
 // This function is meant for exporting the same number of images as input frames,
 // using the names/numbers of these frames as the filenames of the exported images.
-void IOHandler::exportAllFrames(const std::vector<QImage>& images, const QDir outputDir)
+void IOHandler::exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images, const QDir outputDir)
 {
     if (images.size() != _inputFrameNums.size()) {
         std::cerr << "Error: Number of images to export does "
