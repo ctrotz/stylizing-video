@@ -8,6 +8,7 @@
 #include <Eigen/Core>
 
 #include "iohandler.h"
+#include "gedge.h"
 
 using namespace std;
 
@@ -56,6 +57,10 @@ int main(int argc, char *argv[])
     vector<QImage> keyframes;
 
     ioHandler.loadInputData(inputFrames, keyframes);
+
+    std::shared_ptr<QImage> currFrame(new QImage("./data/minitest/video/000.jpg"));
+
+    GEdge guide(currFrame);
 
     ioHandler.exportAllFrames(inputFrames);
 
