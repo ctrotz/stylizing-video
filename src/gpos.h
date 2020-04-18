@@ -3,6 +3,8 @@
 
 #include "guide.h"
 #include <QObject>
+#include <QImage>
+
 #include <memory>
 
 class GPos : public Guide
@@ -10,6 +12,7 @@ class GPos : public Guide
 public:
     GPos(std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> g_mask);
     virtual ~GPos();
+    static std::shared_ptr<QImage> generateGradient(int width, int height, QColor xColor = {255,0,0}, QColor yColor = {0,255,0});
 
 protected:
     std::shared_ptr<QImage> getGuide();
