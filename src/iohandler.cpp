@@ -24,7 +24,7 @@ void IOHandler::collectImageFilepaths()
         QString filename = curPath.section('/', -1);
 
         if (isdigit(filename.toStdString()[0]) &&
-            (curPath.endsWith(".jpg") || curPath.endsWith(".jpeg"))) {
+            (curPath.endsWith(".jpg") || curPath.endsWith(".jpeg") || curPath.endsWith(".png"))) {
             int frameNum = std::stoi(filename.toStdString());
 
             // Check if within frame number range
@@ -42,7 +42,7 @@ void IOHandler::collectImageFilepaths()
         QString filename = curPath.section('/', -1);
 
         if (isdigit(filename.toStdString()[0]) &&
-            (curPath.endsWith(".jpg") || curPath.endsWith(".jpeg"))) {
+            (curPath.endsWith(".jpg") || curPath.endsWith(".jpeg") || curPath.endsWith(".png"))) {
             int frameNum = std::stoi(filename.toStdString());
 
             // Check if within frame number range
@@ -126,7 +126,11 @@ void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,
     for (uint i = 0; i < images.size(); ++i) {
         QString outPath = outputDir.path();
         QString filename = filenames.at(i);
-        filename.append(".jpg");
+
+		if (!filename.endsWith(".jpg") && !filename.endsWith(".jpeg")) {
+			filename.append(".jpg");
+		}
+
         outPath = outPath.append("/").append(filename);
 
         images.at(i)->save(outPath, "JPG");
