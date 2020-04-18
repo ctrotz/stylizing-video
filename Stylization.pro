@@ -1,7 +1,7 @@
 QT += gui
 QT += xml
 
-CONFIG += c++1Z console
+CONFIG += c++1z console
 CONFIG -= app_bundle
 
 # The following define makes your compiler emit warnings if you use
@@ -27,7 +27,8 @@ SOURCES += src/main.cpp \
     src/gtemp.cpp \
     src/stylizer.cpp \
     src/iohandler.cpp \
-    src/opencvutils.cpp
+    src/opencvutils.cpp \
+    src/advector.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
@@ -37,7 +38,8 @@ HEADERS += src/guide.h \
     src/stylizer.h \
     src/iohandler.h \
     src/optical-flow/simpleflow.h \
-    src/opencvutils.h
+    src/opencvutils.h \
+    src/advector.h
 
 INCLUDEPATH += lib/
 macx {
