@@ -1,6 +1,7 @@
 #include "gpos.h"
 
 #include <QLinearGradient>
+#include <QPainter>
 
 
 GPos::GPos(std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> g_mask) :
@@ -18,13 +19,14 @@ GPos::~GPos(){
 
 std::shared_ptr<QImage> GPos::generateGradient(int width, int height, QColor xColor, QColor yColor)
 {
-    std::shared_ptr<QImage> out = std::make_shared<QImage>(width, height, QImage::Format_RGB32);
+    std::shared_ptr<QImage> out = std::make_shared<QImage>(width, height, QImage::Format_ARGB32);
     out->fill(Qt::white);
     QLinearGradient linearGrad(QPointF(width, 0), QPointF(0, height));
-    linearGrad.setColorAt(0, Qt::red);
-    linearGrad.setColorAt(1, Qt::green);
-
-
+    linearGrad.setColorAt(0, xColor);
+    linearGrad.setColorAt(1, yColor);
+    QPainter painter(&(*out));
+    painter.fillRect(out->rect(), linearGrad);
+    return out;
 }
 
 std::shared_ptr<QImage> GPos::getGuide(){
