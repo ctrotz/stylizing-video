@@ -8,8 +8,15 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 
-#define SIZE 5
 #define SIGMA 6.0
+#define LAP false //option with Laplacian
+#if LAP==true //if using Laplacian filter
+#define SIZE 3
+#endif
+#if LAP==false //if using Gaussian filter instead
+#define SIZE 5
+#endif
+#define SAVE true //saves guide as image in directory
 
 using namespace cv;
 
@@ -17,7 +24,7 @@ GEdge::GEdge(std::shared_ptr<QImage> currFrame) :
     Guide(currFrame),
     m_guide(nullptr)
 {
-    createEdge2(currFrame);
+    createEdge(currFrame);
 }
 
 GEdge::~GEdge(){
@@ -40,39 +47,39 @@ void GEdge::makeFilter(std::vector<double> &GKernel){
 
     int radius = floor(SIZE/2.0);
 
-//    GKernel.push_back(0);
-//    GKernel.push_back(1);
-//    GKernel.push_back(0);
+    if (LAP){ //create 3x3 Laplacian filter
+        GKernel.push_back(0);
+        GKernel.push_back(1);
+        GKernel.push_back(0);
 
-//    GKernel.push_back(1);
-//    GKernel.push_back(-4);
-//    GKernel.push_back(1);
+        GKernel.push_back(1);
+        GKernel.push_back(-4);
+        GKernel.push_back(1);
 
-//    GKernel.push_back(0);
-//    GKernel.push_back(1);
-//    GKernel.push_back(0);
-
-
-    //generate kernel
-    for (int x = -radius; x <= radius; x++) {
-        for (int y = -radius; y <= radius; y++) {
-            r = sqrt(x * x + y * y);
-            size_t index = ((x+radius) * SIZE) + (y+radius);
-            GKernel[index] = (exp(-(r * r) / s)) / (M_PI * s);
-            sum += GKernel[index];
+        GKernel.push_back(0);
+        GKernel.push_back(1);
+        GKernel.push_back(0);
+    } else { //otherwise generate 5x5 Gaussian filter
+        //generate kernel
+        for (int x = -radius; x <= radius; x++) {
+            for (int y = -radius; y <= radius; y++) {
+                r = sqrt(x * x + y * y);
+                size_t index = ((x+radius) * SIZE) + (y+radius);
+                GKernel[index] = (exp(-(r * r) / s)) / (M_PI * s);
+                sum += GKernel[index];
+            }
         }
-    }
 
-    // normalizing the kernel
-    for (int i = 0; i < SIZE; i++){
-        for (int j = 0; j < SIZE; j++){
-            size_t index = i * SIZE + j;
-            GKernel[index] /= sum;
+        // normalizing the kernel
+        for (int i = 0; i < SIZE; i++){
+            for (int j = 0; j < SIZE; j++){
+                size_t index = i * SIZE + j;
+                GKernel[index] /= sum;
+            }
         }
     }
 }
 
-// http://www.songho.ca/dsp/convolution/convolution.html#cpp_conv2d
 void GEdge::convolve(std::vector<double> &GKernel, RGBA* data, const int width, const int height){
     // find center position of kernel (half of kernel size)
     const int radius = floor(SIZE/2.0);
@@ -114,24 +121,37 @@ void GEdge::convolve(std::vector<double> &GKernel, RGBA* data, const int width, 
                     }
                 }
             }
-            RGBA color = {REAL2byte(red_acc), REAL2byte(green_acc), REAL2byte(blue_acc)};
+            RGBA color;
+            if (LAP){ //add 0.5 to all values
+                color = {REAL2byte(red_acc+0.5), REAL2byte(green_acc+0.5), REAL2byte(blue_acc+0.5)};
+            } else {
+                color = {REAL2byte(red_acc), REAL2byte(green_acc), REAL2byte(blue_acc)};
+            }
             temp[index] = color;
         }
     }
 
-    std::vector<RGBA> temp2;
-    temp2.reserve(width*height);
+    if (LAP){
+        memcpy(data, &temp[0], width*height*sizeof(RGBA));
+    } else {
+        std::vector<RGBA> temp2;
+        temp2.reserve(width*height);
 
-    for(int i=0; i < height; i++){ //rows
-        for(int j=0; j < width; j++){ //columns
-            size_t index = i * width + j;
-            temp2[index] = data[index] - temp[index];
-//            temp2[index] = temp[index];
+        RGBA add = {REAL2byte(0.5), REAL2byte(0.5), REAL2byte(0.5)};
+
+        //for Gaussian, subtract blurred from original and add 0.5
+        for(int i=0; i < height; i++){
+            for(int j=0; j < width; j++){
+                size_t index = i * width + j;
+                temp2[index] = data[index] - temp[index];
+                temp2[index] = temp2[index] + add;
+            }
         }
+        memcpy(data, &temp2[0], width*height*sizeof(RGBA));
     }
-    memcpy(data, &temp2[0], width*height*sizeof(RGBA));
 }
 
+// convert image to grayscale
 void GEdge::makeGray(RGBA *data, const int width, const int height){
     for(int i=0; i < height; i++){
         for(int j=0; j < width; j++){
@@ -145,57 +165,24 @@ void GEdge::makeGray(RGBA *data, const int width, const int height){
 }
 
 void GEdge::createEdge(std::shared_ptr<QImage> currFrame){
+    //convert to 4 channel RGBA
     if (currFrame->format() != QImage::Format_RGBX8888){
         currFrame = std::make_shared<QImage>(currFrame->convertToFormat(QImage::Format_RGBX8888));
     }
     RGBA *data = getData(currFrame);
     const int height = currFrame->height();
     const int width = currFrame->width();
-    std::cout << height << std::endl;
 
     std::vector<double> GKernel;
     GKernel.reserve(SIZE*SIZE);
 
     makeFilter(GKernel);
     makeGray(data, width, height);
-    convolve(GKernel, data, width, height); //maybe fill in temp2 instead
-    std::cout<< width * height << std::endl;
+    convolve(GKernel, data, width, height);
 
-//    std::shared_ptr<QImage> guide(new QImage(width, height, QImage::Format_RGBX8888));
-//    memset(guide->bits(), 0, width * height * sizeof(RGBA));
-//    memcpy(data, guide->bits(), guide->byteCount());
-//    std::cout << static_cast<int>(guide[100].r) <<std::endl;
-
-    for(int i=0; i < height; i++){
-        for(int j=0; j < width; j++){
-            size_t index = i * width + j;
-            int r = data[index].r;
-            int g = data[index].g;
-            int b = data[index].b;
-            currFrame->setPixel(i,j, qRgb(r,g,b));
-        }
+    if (SAVE){
+        const QString filename("test.png");
+        currFrame->save(filename, nullptr, 100);
     }
-    const QString filename("test5.png");
-    currFrame->save(filename, nullptr, 100);
-//    m_guide = guide;
-}
-
-void GEdge::createEdge2(std::shared_ptr<QImage> currFrame){
-//    QImage::Format fm = currFrame->format();
-    Mat curr = cv::imread("./data/minitest/video/000.jpg");
-//    Mat mat = Mat(currFrame->height(), currFrame->width(), 1, const_cast<uchar*>(currFrame->bits()), currFrame->bytesPerLine()).clone();
-//    std::vector<int> compression_params;
-//    compression_params.push_back(IMWRITE_PNG_COMPRESSION);
-//    compression_params.push_back(9);
-//    imwrite("sad.png", mat, compression_params);
-//    Mat mat(currFrame->height(), currFrame->width(), CV_16SC3, currFrame->bits());
-//    Mat output;
-//    GaussianBlur(mat, output, Size(3,3), 6);
-//    cv::namedWindow( "Display window", WINDOW_KEEPRATIO );// Create a window for display.
-//    cv::imshow( "Display window", mat);
-//    waitKey(0);
-//    *currFrame = QImage(output.data, output.cols, output.rows, output.step, fm).copy();
-//    const QString filename("test3.png");
-//    currFrame->save(filename, nullptr, 100);
-//    m_guide = currFrame;
+    m_guide = currFrame;
 }

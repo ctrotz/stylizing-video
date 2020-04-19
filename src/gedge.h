@@ -33,7 +33,6 @@ protected:
 private:
     std::shared_ptr<QImage> m_guide;
     void createEdge(std::shared_ptr<QImage> currFrame);
-    void createEdge2(std::shared_ptr<QImage> currFrame);
 };
 
 #endif // GEDGE_H
