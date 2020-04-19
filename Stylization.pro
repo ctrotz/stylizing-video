@@ -25,17 +25,20 @@ SOURCES += src/main.cpp \
     src/gmask.cpp \
     src/gpos.cpp \
     src/gtemp.cpp \
-    src/stylizer.cpp
+    src/stylizer.cpp \
+    src/iohandler.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
     src/gmask.h \
     src/gpos.h \
     src/gtemp.h \
-    src/stylizer.h
+    src/stylizer.h \
+    src/iohandler.h
 
 INCLUDEPATH += lib/
 macx {
+
     INCLUDEPATH += /usr/local/include/opencv4
     LIBS += -L/usr/local/lib/\
      -lopencv_calib3d.4.3.0\
