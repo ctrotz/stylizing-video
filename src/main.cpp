@@ -11,6 +11,7 @@
 #include "iohandler.h"
 
 #include "iohandler.h"
+#include "gedge.h"
 #include "optical-flow/simpleflow.h"
 #include "opencvutils.h"
 #include "advector.h"
@@ -65,6 +66,12 @@ int main(int argc, char *argv[])
 
     ioHandler.loadInputData(inputFrames, keyframes);
 
+    std::shared_ptr<QImage> currFrame(new QImage("./data/minitest/video/000.jpg"));
+
+    GEdge guide(currFrame);
+
+    ioHandler.exportAllFrames(inputFrames);
+  
     Advector advector = Advector();
 
     Mat i1, i2, out;
