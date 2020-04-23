@@ -13,21 +13,14 @@ These should be installed to `/usr/local` to link properly with this project.
 
 We recommend the following workflow:
 1. Clone both repositories to the `deps/` directory.
-<<<<<<< HEAD
 2. Create a `build` directory in the cloned `opencv` repo and `cd` into it. 
 3. Run 
-=======
-2. Create a `build` directory in the cloned `opencv` repo and `cd` into it.
-3. Run
->>>>>>> 2203b43e00eb59fbc6942eda05ca020eadde24c9
 ```
 cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ..
 make -j4
 make install
 ```
 4. All set!
-<<<<<<< HEAD
-=======
 
 ## Implementation
 ### Guide Generation
@@ -44,8 +37,6 @@ between images using SimpleFlow from opencv_contrib. We present below vector fie
 * Scalar vy field encoded as grayscale:  
 
 ![Cat vy in gray](https://media.giphy.com/media/mFl7l8vvtbO2cR3aw7/giphy.gif)
-
->>>>>>> 2203b43e00eb59fbc6942eda05ca020eadde24c9
 
 ## Citations
 Ondřej Jamriška, Šárka Sochorová, Ondřej Texler, Michal Lukáč, Jakub Fišer, Jingwan Lu, Eli Shechtman, and Daniel Sýkora. 2019.
