@@ -14,7 +14,6 @@ void Advector::advect(const cv::Mat2f& flowField, std::shared_ptr<QImage> mask,
 {
     assert(inFrame->size() == outFrame->size());
 
-
     int imgH = outFrame->height();
     int imgW = outFrame->width();
 
@@ -68,7 +67,7 @@ QColor Advector::bilinearInterpolate(std::shared_ptr<QImage> img,
         f22 = img->pixelColor(x2, y2);
     }
 
-    float scale = 1.f / ((x2-x1)*(y2-y1));
+    float scale = 1.f / static_cast<float>((x2-x1)*(y2-y1));
 
     Eigen::Matrix<float, 1, 2> xMat;
     xMat << x2-x, x-x1;
@@ -104,7 +103,5 @@ bool Advector::isInBounds(int x, int y, std::shared_ptr<QImage> img,
 {
     if (x < 0 || x >= img->width()) return false;
     if (y < 0 || y >= img->height()) return false;
-    if (mask->pixel(x, y) == 0) return false;
-
-    return true;
+    return mask->pixel(x, y) != 0;
 }
