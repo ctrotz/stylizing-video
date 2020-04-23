@@ -6,6 +6,9 @@
 #include <iostream>
 #include <filesystem>
 #include <Eigen/Core>
+#include "gmask.h"
+
+#include "iohandler.h"
 
 #include "iohandler.h"
 #include "optical-flow/simpleflow.h"

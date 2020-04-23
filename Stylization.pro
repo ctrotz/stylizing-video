@@ -43,6 +43,7 @@ HEADERS += src/guide.h \
 
 INCLUDEPATH += lib/
 macx {
+
     INCLUDEPATH += /usr/local/include/opencv4
     LIBS += -L/usr/local/lib/\
      -lopencv_calib3d.4.3.0\

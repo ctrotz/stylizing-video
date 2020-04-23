@@ -3,12 +3,14 @@
 
 #include "guide.h"
 #include <QObject>
+#include <QImage>
 
 class GMask : public Guide
 {
 public:
-    GMask(std::shared_ptr<QImage> currFrame);
+    GMask(std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> currMask = NULL);
     virtual ~GMask();
+
 
 protected:
     std::shared_ptr<QImage> getGuide();
