@@ -30,9 +30,19 @@
 *.exe
 *.out
 *.app
+Stylization
 
 .DS_Store
 
 *.user
+*.user*
 *.stash
 
+Makefile
+compile_commands.json
+.clangd/
+
+output/
+
+deps/opencv/
+deps/opencv_contrib/
