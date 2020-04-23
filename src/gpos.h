@@ -3,23 +3,24 @@
 
 #include "guide.h"
 #include <QObject>
+#include <QImage>
+#include <opencv2/core.hpp>
+
 #include <memory>
 
 class GPos : public Guide
 {
 public:
-    GPos(std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> g_mask);
+    GPos(std::shared_ptr<QImage> g_mask);
     virtual ~GPos();
-
-protected:
+    static std::shared_ptr<QImage> generateGradient(int width, int height, QColor xColor = Qt::red, QColor yColor = Qt::green);
+    void advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField);
     std::shared_ptr<QImage> getGuide();
-    std::shared_ptr<QImage> getMotion(); //for G_temp
 
 private:
-    std::shared_ptr<QImage> m_guide;
-    std::shared_ptr<QImage> m_motion;
 
-    void createPos();
+    std::shared_ptr<QImage> m_guide;
+    std::shared_ptr<QImage> m_mask;
 };
 
 #endif // GPOS_H

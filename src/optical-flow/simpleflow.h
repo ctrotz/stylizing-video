@@ -30,10 +30,11 @@ Mat calculateFlow(const Mat& i1, const Mat& i2, bool retColor = false,  bool ims
       return Mat();
     }
 
-    if (i1.type() != 16 || i2.type() != 16) {
-      printf("Images should be of equal type CV_8UC3\n");
-      return Mat();
-    }
+//    if (i1.type() != 16 || i2.type() != 16) {
+//      printf("Images should be of equal type CV_8UC3\n");
+//      return Mat();
+//    }
+
     optflow::calcOpticalFlowSF(i1, i2,
                         flow,
                         3, 2, 4, 4.1, 25.5, 18, 55.0, 25.5, 0.35, 18, 55.0, 25.5, 10);
@@ -61,6 +62,8 @@ Mat calculateFlow(const Mat& i1, const Mat& i2, bool retColor = false,  bool ims
     Mat bgr;//CV_32FC3 matrix
     cvtColor(hsv, bgr, COLOR_HSV2BGR);
     if (imshowFlag) {
+        imshow("i1", i1);
+        imshow("i2", i2);
         imshow("flow", bgr);
         waitKey(0);
     }

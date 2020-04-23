@@ -15,6 +15,7 @@
 #include "optical-flow/simpleflow.h"
 #include "opencvutils.h"
 #include "advector.h"
+#include "gpos.h"
 
 
 using namespace std;
@@ -73,44 +74,27 @@ int main(int argc, char *argv[])
     ioHandler.exportAllFrames(inputFrames);
   
     Advector advector = Advector();
+    std::shared_ptr<QImage> mask(new QImage(*inputFrames.at(0)));
 
-    Mat i1, i2, out;
-    Mat xy[2];
-    Mat vx;
-    Mat vy;
+    mask->fill(Qt::white);
+    GPos gpos_start = GPos(mask);
+    GPos gpos_cur = gpos_start;
+    advectedFrames.push_back(gpos_cur.getGuide());
+    Mat i1, i2;
+    Mat2f out;
     for (uint i = 0; i < inputFrames.size() - 1; i++) {
-        i1 = qimage_to_mat_ref((*inputFrames.at(i)), CV_8UC3);
-        i2 = qimage_to_mat_ref((*inputFrames.at(i + 1)), CV_8UC3);
+        i1 = qimage_to_mat_ref((*inputFrames.at(i)));
+        i2 = qimage_to_mat_ref((*inputFrames.at(i + 1)));
+
+        cvtColor(i1, i1, COLOR_BGRA2BGR);
+        cvtColor(i2, i2, COLOR_BGRA2BGR);
+
         std::cout << "flow #" << to_string(i) <<  " calculated" << std::endl;
-        out = calculateFlow(i1, i2);
-
-        std::shared_ptr<QImage> newFrame(new QImage(*inputFrames.at(i)));
-        std::shared_ptr<QImage> mask(new QImage(*inputFrames.at(i)));
-
-        mask->fill(Qt::white);
-
-        if (i == 0) {
-            advector.advect(out, mask, inputFrames.at(i), newFrame);
-        } else {
-            advector.advect(out, mask, advectedFrames.at(i-1), newFrame);
-        }
-
-        advectedFrames.push_back(newFrame);
-
-//        std::cout << "mat type: " << type2str(out.type()) << std::endl;
-//        split(out, xy);
-//        convertScaleAbs(xy[0],vx, 100, 0.0);
-//        convertScaleAbs(xy[1],vy, 100, 0.0);
-//        imshow("flow vx", vx);
-//        imshow("flow vy", vy);
-//        waitKey(0);
-//        out.convertTo(out, CV_8UC3, 255.0);
-//        imwrite(outputDir.toStdString() + "/flow_vx" + to_string(i) +  ".jpg", vx);
-//        imwrite(outputDir.toStdString() + "/flow_vy" + to_string(i) +  ".jpg", vy);
-
+        out = calculateFlow(i1, i2, false, true);
+        gpos_cur.advect(mask, out);
+        advectedFrames.push_back(gpos_cur.getGuide());
     }
-
-    ioHandler.exportImages(advectedFrames, QDir("./newimgs"));
+    ioHandler.exportImages(advectedFrames, QDir("./gpos_inpaint"));
 
     a.exit();
 

@@ -1,8 +1,23 @@
 #include "opencvutils.h"
-cv::Mat qimage_to_mat_ref(QImage &img, int format)
+cv::Mat qimage_to_mat_ref(QImage &image)
 {
-    return cv::Mat(img.height(), img.width(),
-            format, img.bits(), img.bytesPerLine());
+    cv::Mat mat;
+        switch (image.format())
+        {
+        case QImage::Format_ARGB32:
+        case QImage::Format_RGB32:
+        case QImage::Format_ARGB32_Premultiplied:
+            mat = cv::Mat(image.height(), image.width(), CV_8UC4, (void*)image.constBits(), image.bytesPerLine());
+            break;
+        case QImage::Format_RGB888:
+            mat = cv::Mat(image.height(), image.width(), CV_8UC3, (void*)image.constBits(), image.bytesPerLine());
+            cv::cvtColor(mat, mat, COLOR_BGR2RGB);
+            break;
+        case QImage::Format_Grayscale8:
+            mat = cv::Mat(image.height(), image.width(), CV_8UC1, (void*)image.constBits(), image.bytesPerLine());
+            break;
+        }
+        return mat;
 }
 
 QImage mat_to_qimage_ref(cv::Mat &mat, QImage::Format format)
