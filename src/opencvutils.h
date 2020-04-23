@@ -6,7 +6,7 @@
 #include <QImage>
 using namespace cv;
 
-cv::Mat qimage_to_mat_ref(QImage &img, int format);
+cv::Mat qimage_to_mat_ref(QImage &image);
 QImage mat_to_qimage_ref(cv::Mat &mat, QImage::Format format);
 String type2str(int type);
 #endif // OPENCVUTILS_H
