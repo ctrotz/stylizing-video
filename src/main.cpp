@@ -57,6 +57,11 @@ int main(int argc, char *argv[])
 
     ioHandler.loadInputData(inputFrames, keyframes);
 
+    GMask mask = GMask(make_shared<QImage>(inputFrames[0]));
+    mask.m_mask->save("./temp.jpg");
+    GMask mask2 = GMask(make_shared<QImage>(inputFrames[1]));
+    mask2.m_mask->save("./temp1.jpg");
+
     ioHandler.exportAllFrames(inputFrames);
 
     a.exit();
