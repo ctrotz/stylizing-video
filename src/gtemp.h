@@ -2,23 +2,31 @@
 #define GTEMP_H
 
 #include "guide.h"
+#include "advector.h"
+
 #include <QObject>
+
 #include <opencv2/core/mat.hpp>
 
 class GTemp : public Guide
 {
 public:
-    GTemp(std::shared_ptr<QImage> currFrame,
-          std::shared_ptr<QImage> mask,
+    GTemp();
+    GTemp(std::shared_ptr<QImage> prevStylizedFrame,
           cv::Mat& motionField,
-          std::shared_ptr<QImage> prevOut);
+          std::shared_ptr<QImage> mask);
+
     virtual ~GTemp();
+
     std::shared_ptr<QImage> getGuide();
+
+    void updateGuide(std::shared_ptr<QImage> prevStylizedFrame,
+                     cv::Mat& motionField,
+                     std::shared_ptr<QImage> mask);
 
 private:
     std::shared_ptr<QImage> m_guide;
-    void createTemp(cv::Mat& motionField, std::shared_ptr<QImage> mask,
-                    std::shared_ptr<QImage> prevFrame);
+    Advector m_advector;
 };
 
 #endif // GTEMP_H
