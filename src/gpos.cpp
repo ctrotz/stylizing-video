@@ -34,20 +34,13 @@ std::shared_ptr<QImage> GPos::getGuide(){
     return m_guide;
 }
 
-GPos::GPos(std::shared_ptr<QImage> g_mask, std::shared_ptr<QImage> advected) :
-    m_mask(g_mask),
-    m_guide(advected)
-{
 
-}
-
-GPos GPos::advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField) {
+void GPos::advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField) {
     Advector advector = Advector();
     std::shared_ptr<QImage> advected = std::make_shared<QImage>(m_guide->width(), m_guide->height(), m_guide->format());
     advected->fill(Qt::white);
     advector.advect(flowField, g_mask, m_guide, advected);
 
-    GPos out = GPos(g_mask, advected);
-    return out;
+    m_mask = g_mask;
 }
 

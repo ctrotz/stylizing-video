@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
         std::cout << "flow #" << to_string(i) <<  " calculated" << std::endl;
         out = calculateFlow(i1, i2, false, true);
-        gpos_cur = gpos_cur.advect(mask, out);
+        gpos_cur.advect(mask, out);
         advectedFrames.push_back(gpos_cur.getGuide());
     }
     ioHandler.exportImages(advectedFrames, QDir("./gpos_inpaint"));
