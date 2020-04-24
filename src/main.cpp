@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
         cvtColor(i2, i2, COLOR_BGRA2BGR);
 
         std::cout << "flow #" << to_string(i) <<  " calculated" << std::endl;
-        out = calculateFlow(i1, i2, false, true);
+        out = calculateFlow(i1, i2, false, false);
         gpos_cur.advect(mask, out);
         advectedFrames.push_back(gpos_cur.getGuide());
     }
