@@ -21,18 +21,22 @@
 using namespace cv;
 
 GEdge::GEdge(std::shared_ptr<QImage> currFrame) :
-    Guide(currFrame),
-    m_guide(nullptr)
+    Guide(currFrame)
+//    m_guide("")
 {
-    createEdge(currFrame);
+    createEdge(currFrame, 0);
 }
 
 GEdge::~GEdge(){
-    m_guide = nullptr;
+//    m_guide = nullptr;
 }
 
-std::shared_ptr<QImage> GEdge::getGuide(){
+QString GEdge::getGuide(){
     return m_guide;
+}
+
+void GEdge::updateFrame(std::shared_ptr<QImage> currFrame, int i) {
+    createEdge(currFrame, i);
 }
 
 RGBA* GEdge::getData(std::shared_ptr<QImage> image){
@@ -164,7 +168,7 @@ void GEdge::makeGray(RGBA *data, const int width, const int height){
     }
 }
 
-void GEdge::createEdge(std::shared_ptr<QImage> currFrame){
+void GEdge::createEdge(std::shared_ptr<QImage> currFrame, int i){
     //convert to 4 channel RGBA
     if (currFrame->format() != QImage::Format_RGBX8888){
         currFrame = std::make_shared<QImage>(currFrame->convertToFormat(QImage::Format_RGBX8888));
@@ -180,9 +184,13 @@ void GEdge::createEdge(std::shared_ptr<QImage> currFrame){
     makeGray(data, width, height);
     convolve(GKernel, data, width, height);
 
-    if (SAVE){
-        const QString filename("test.png");
+//    QString filename;
+//    if (SAVE){
+        QString filename("./guides/edge");
+        filename.append(QString::number(i));
+        filename.append(".png");
         currFrame->save(filename, nullptr, 100);
-    }
-    m_guide = currFrame;
+//    std::system("ls ../../guides && pwd");
+//    }
+    m_guide = filename;
 }

@@ -15,6 +15,7 @@ public:
     void makeFilter(std::vector<double> &GKernel);
     void convolve(std::vector<double> &GKernel, RGBA* data, int width, int height);
     void makeGray(RGBA *data, int width, int height);
+    void updateFrame(std::shared_ptr<QImage> currFrame, int i);
 
     RGBA *getData(std::shared_ptr<QImage> image);
 
@@ -27,12 +28,14 @@ public:
         return (0.299*int(pixel.r)) + (0.587*int(pixel.g)) + (0.114*int(pixel.b));
     }
 
-protected:
-    std::shared_ptr<QImage> getGuide();
+//protected:
+//    std::shared_ptr<QImage> getGuide();
+    QString getGuide();
 
 private:
-    std::shared_ptr<QImage> m_guide;
-    void createEdge(std::shared_ptr<QImage> currFrame);
+//    std::shared_ptr<QImage> m_guide;
+    QString m_guide;
+    void createEdge(std::shared_ptr<QImage> currFrame, int i);
 };
 
 #endif // GEDGE_H
