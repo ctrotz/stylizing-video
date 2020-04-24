@@ -40,7 +40,7 @@ void GPos::advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField) {
     std::shared_ptr<QImage> advected = std::make_shared<QImage>(m_guide->width(), m_guide->height(), m_guide->format());
     advected->fill(Qt::white);
     advector.advect(flowField, g_mask, m_guide, advected);
-
+    m_guide = advected;
     m_mask = g_mask;
 }
 
