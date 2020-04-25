@@ -31,7 +31,7 @@ void Stylizer::generateGuides() {
     GPos gpos_cur = gpos_start;
 //    QString prevPos;
 //    QString g_pos2;
-    QString prevPos = gpos_cur.getGuide2(0);
+    QString prevPos = gpos_cur.getGuide(0);
     Mat i1, i2;
     Mat2f out;
 
@@ -63,15 +63,15 @@ void Stylizer::generateGuides() {
         cvtColor(i1, i1, COLOR_BGRA2BGR);
         cvtColor(i2, i2, COLOR_BGRA2BGR);
 
-        out = calculateFlow(i1, i2, false);
+        out = calculateFlow(i1, i2, false, false);
         gpos_cur.advect(mask, out);
-        QString g_pos2 = gpos_cur.getGuide2(i);
+        QString g_pos2 = gpos_cur.getGuide(i);
 
 //        GTemp gtemp(prevStylizedFrame, out, mask);
         gtemp.updateGuide(prevStylizedFrame, out, mask);
         QString g_temp2 = gtemp.getGuide(i);
 
-        QString prevframe = QString::number(i-1).rightJustified(3, '0');
+        QString prevframe = QString::number(0).rightJustified(3, '0');
         QString frame = QString::number(i).rightJustified(3, '0');
 
         QString command("cd ./deps/ebsynth && bin/ebsynth -style ../../data/test/keys/000.jpg ");
@@ -80,8 +80,6 @@ void Stylizer::generateGuides() {
         command.append(" ../.");
         command.append(g_edge2);
         command.append(" -weight 0.5 ");
-
-        prevEdge = g_edge2;
 
 //        command.append("-guide ");
 //        command.append(g_mask1);
@@ -101,25 +99,22 @@ void Stylizer::generateGuides() {
         command.append(g_pos2);
         command.append(" -weight 2 ");
 
-        prevPos = g_pos2;
-
         command.append("-guide ../.");
         command.append(prevTemp);
         command.append(" ../.");
         command.append(g_temp2);
         command.append(" -weight 0.5 ");
 
-        prevTemp = g_temp2;
-
         command.append("-output ../../outtest/out");
         command.append(frame);
 //        command.append(QString::number(i));
         command.append(".png");
+        command.append(" -searchvoteiters 12 -patchmatchiters 6");
 
         QByteArray ba = command.toLocal8Bit();
         const char *c_str = ba.data();
-        std::cout << i <<std::endl;
         std::system(c_str);
+        prevStylizedFrame = std::make_shared<QImage>("outtest/out" + frame + ".png");
 
     }
 }
