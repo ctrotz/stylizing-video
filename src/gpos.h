@@ -16,9 +16,9 @@ public:
     static std::shared_ptr<QImage> generateGradient(int width, int height, QColor xColor = Qt::red, QColor yColor = Qt::green);
     void advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField);
     std::shared_ptr<QImage> getGuide();
+    QString getGuide(int i);
 
 private:
-
     std::shared_ptr<QImage> m_guide;
     std::shared_ptr<QImage> m_mask;
 };

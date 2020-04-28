@@ -1,5 +1,6 @@
 #include "gtemp.h"
 #include "advector.h"
+#include <iostream>
 
 GTemp::GTemp() :
     Guide(nullptr),
@@ -15,7 +16,7 @@ GTemp::GTemp(std::shared_ptr<QImage> prevStylizedFrame,
     m_guide(nullptr),
     m_advector()
 {
-    updateGuide(mask, motionField, prevStylizedFrame);
+    updateGuide(prevStylizedFrame, motionField, mask);
 }
 
 GTemp::~GTemp()
@@ -23,9 +24,13 @@ GTemp::~GTemp()
     m_guide = nullptr;
 }
 
-std::shared_ptr<QImage> GTemp::getGuide()
+QString GTemp::getGuide(int i)
 {
-    return m_guide;
+    QString filename("./guides/temp");
+    filename.append(QString::number(i));
+    filename.append(".png");
+    m_guide->save(filename, nullptr, 100);
+    return filename;
 }
 
 // Recompute guide given mask, optical flow field, and previous stylized frame
