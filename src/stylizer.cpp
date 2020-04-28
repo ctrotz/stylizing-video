@@ -38,8 +38,7 @@ std::vector<QString> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int k
     std::shared_ptr<QImage> frame1(new QImage(*m_frames.at(beg)));
 
     GEdge edge(frame1);
-    edge.updateFrame(frame1, beg);
-    prevEdge = edge.getGuide();
+    prevEdge = edge.getGuide(beg);
 
     mask->fill(Qt::white);
     GPos gpos_start = GPos(mask);
@@ -60,11 +59,11 @@ std::vector<QString> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int k
     for (int i = beg+step; i != end; i+=step){
         std::shared_ptr<QImage> frame2(new QImage(*m_frames.at(i)));
 
-        edge.updateFrame(frame2, i);
-        QString g_edge2 = edge.getGuide();
+        edge.updateFrame(frame2);
+        QString g_edge2 = edge.getGuide(i);
 
 //        std::shared_ptr<QImage> frame1m(new QImage(m_frames(i)->copy()));
-//        std::shared_ptr<QImage> frame2m(new QImage(m_frames(i+1)->copy()));
+//        std::shared_ptr<QImage> frame2m(new QImage(m_frames(i+step)->copy()));
 //        GMask mask(frame1m);
 //        QString g_mask1 = mask->getGuide();
 //        mask->updateFrame(frame2m);
@@ -105,7 +104,8 @@ std::vector<QString> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int k
 
         QByteArray ba = command.toLocal8Bit();
         const char *c_str = ba.data();
-        std::system(c_str);
+//        std::system(c_str);
+        std::cout << c_str << std::endl;
         prevStylizedFrame = std::make_shared<QImage>(outfile);
         outpaths.push_back(outfile);
     }

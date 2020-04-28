@@ -20,20 +20,25 @@
 using namespace cv;
 
 GEdge::GEdge(std::shared_ptr<QImage> currFrame) :
-    Guide(currFrame)
+    Guide(currFrame), m_guide(nullptr)
 {
-    createEdge(currFrame, 0);
+    createEdge(currFrame);
 }
 
 GEdge::~GEdge(){
+    m_guide = nullptr;
 }
 
-QString GEdge::getGuide(){
-    return m_guide;
+QString GEdge::getGuide(int i){
+    QString filename("./guides/edge");
+    filename.append(QString::number(i));
+    filename.append(".png");
+    m_guide->save(filename, nullptr, 100);
+    return filename;
 }
 
-void GEdge::updateFrame(std::shared_ptr<QImage> currFrame, int i) {
-    createEdge(currFrame, i);
+void GEdge::updateFrame(std::shared_ptr<QImage> currFrame) {
+    createEdge(currFrame);
 }
 
 RGBA* GEdge::getData(std::shared_ptr<QImage> image){
@@ -165,7 +170,7 @@ void GEdge::makeGray(RGBA *data, const int width, const int height){
     }
 }
 
-void GEdge::createEdge(std::shared_ptr<QImage> currFrame, int i){
+void GEdge::createEdge(std::shared_ptr<QImage> currFrame){
     //convert to 4 channel RGBA
     if (currFrame->format() != QImage::Format_RGBX8888){
         currFrame = std::make_shared<QImage>(currFrame->convertToFormat(QImage::Format_RGBX8888));
@@ -181,9 +186,5 @@ void GEdge::createEdge(std::shared_ptr<QImage> currFrame, int i){
     makeGray(data, width, height);
     convolve(GKernel, data, width, height);
 
-    QString filename("./guides/edge");
-    filename.append(QString::number(i));
-    filename.append(".png");
-    currFrame->save(filename, nullptr, 100);
-    m_guide = filename;
+    m_guide = currFrame;
 }
