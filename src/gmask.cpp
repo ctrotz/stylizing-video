@@ -10,29 +10,33 @@ using namespace std;
 using namespace cv;
 
 GMask::GMask(std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> currMask) :
-    Guide(currFrame),
-    m_mask(nullptr)
+    Guide(currFrame)
+//    m_mask(nullptr)
 {
-    if (currMask == NULL) {
-        createMask(currFrame);
-    } else {
-        m_mask = currMask;
-    }
+//    if (currMask == NULL) {
+        createMask(currFrame, 0);
+//    } else {
+//        m_mask = currMask;
+//    }
 }
 
 GMask::~GMask(){
     m_mask = nullptr;
 }
 
-std::shared_ptr<QImage> GMask::getGuide(){
+QString GMask::getGuide(){
     return m_mask;
 }
 
-void GMask::setMask(std::shared_ptr<QImage> mask){
-    m_mask = mask;
+void GMask::updateFrame(std::shared_ptr<QImage> frame, int i) {
+    createMask(frame, i);
 }
 
-void GMask::createMask(std::shared_ptr<QImage> currFrame){
+void GMask::setMask(std::shared_ptr<QImage> mask){
+//    m_mask = mask;
+}
+
+void GMask::createMask(std::shared_ptr<QImage> currFrame, int i){
 
     // Detect edges
     Mat mat;
@@ -113,5 +117,10 @@ void GMask::createMask(std::shared_ptr<QImage> currFrame){
     // Make sure mask is 1 channel
     mask.convertTo(mask,CV_8UC1,1);
     QImage imgIn = QImage(mask.data, mask.cols, mask.rows, static_cast<int>(mask.step), QImage::Format_Grayscale8);
-    m_mask = make_shared<QImage>(imgIn);
+    QString filename("./guides/mask");
+    filename.append(QString::number(i));
+    filename.append(".png");
+    imgIn.save(filename, nullptr, 100);
+//    m_mask = make_shared<QImage>(imgIn);
+    m_mask = filename;
 }

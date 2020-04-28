@@ -18,7 +18,7 @@ public:
 
     virtual ~GTemp();
 
-    std::shared_ptr<QImage> getGuide();
+    QString getGuide(int i);
 
     void updateGuide(std::shared_ptr<QImage> prevStylizedFrame,
                      cv::Mat& motionField,
