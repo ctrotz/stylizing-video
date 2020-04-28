@@ -48,10 +48,12 @@ void GPos::advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField) {
     advected->fill(Qt::white);
     advector.advect(flowField, g_mask, m_guide, advected);
     m_guide = advected;
+
 //    cv::imshow("gpos", qimage_to_mat_ref((*m_guide)));
 //    std::cout << "window open" << std::endl;
 //    cv::waitKey(0);
 //    std::cout << "window close" << std::endl;
+
     m_mask = g_mask;
 }
 
