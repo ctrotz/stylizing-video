@@ -71,8 +71,9 @@ int main(int argc, char *argv[])
 //    std::shared_ptr<QImage> currFrame(new QImage("./data/minitest/video/000.jpg"));
 
 //    GEdge guide(currFrame);
-    Stylizer style(inputFrames, keyframes);
-    style.generateGuides();
+    Stylizer style(inputFrames, keyframes, ioHandler);
+//    style.generateGuides();
+    style.run();
 
 //    ioHandler.exportAllFrames(inputFrames);
   

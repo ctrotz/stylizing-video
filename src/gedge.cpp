@@ -16,19 +16,16 @@
 #if LAP==false //if using Gaussian filter instead
 #define SIZE 5
 #endif
-#define SAVE true //saves guide as image in directory
 
 using namespace cv;
 
 GEdge::GEdge(std::shared_ptr<QImage> currFrame) :
     Guide(currFrame)
-//    m_guide("")
 {
     createEdge(currFrame, 0);
 }
 
 GEdge::~GEdge(){
-//    m_guide = nullptr;
 }
 
 QString GEdge::getGuide(){
@@ -184,13 +181,9 @@ void GEdge::createEdge(std::shared_ptr<QImage> currFrame, int i){
     makeGray(data, width, height);
     convolve(GKernel, data, width, height);
 
-//    QString filename;
-//    if (SAVE){
-        QString filename("./guides/edge");
-        filename.append(QString::number(i));
-        filename.append(".png");
-        currFrame->save(filename, nullptr, 100);
-//    std::system("ls ../../guides && pwd");
-//    }
+    QString filename("./guides/edge");
+    filename.append(QString::number(i));
+    filename.append(".png");
+    currFrame->save(filename, nullptr, 100);
     m_guide = filename;
 }

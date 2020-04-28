@@ -29,7 +29,6 @@ QString GTemp::getGuide(int i)
     QString filename("./guides/temp");
     filename.append(QString::number(i));
     filename.append(".png");
-//    std::cout << filename.toUtf8().constData() << std::endl;
     m_guide->save(filename, nullptr, 100);
     return filename;
 }
