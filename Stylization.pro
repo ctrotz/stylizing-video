@@ -28,7 +28,8 @@ SOURCES += src/main.cpp \
     src/stylizer.cpp \
     src/iohandler.cpp \
     src/opencvutils.cpp \
-    src/advector.cpp
+    src/advector.cpp \
+    src/fft_fsolver.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
@@ -39,11 +40,15 @@ HEADERS += src/guide.h \
     src/iohandler.h \
     src/optical-flow/simpleflow.h \
     src/opencvutils.h \
-    src/advector.h
+    src/advector.h \
+    src/fft_fsolver.h
 
 INCLUDEPATH += lib/
+INCLUDEPATH += deps/ebsynth/include
 macx {
-    INCLUDEPATH += /usr/local/include/opencv4
+    INCLUDEPATH += /usr/local/include \
+     /usr/local/include/opencv4
+
     LIBS += -L/usr/local/lib/\
      -lopencv_calib3d.4.3.0\
      -lopencv_core.4.3.0\
@@ -59,8 +64,12 @@ macx {
      -lopencv_video.4.3.0\
      -lopencv_videostab.4.3.0\
      -lopencv_imgcodecs.4.3.0\
-      -lopencv_optflow.4.3.0
+     -lopencv_optflow.4.3.0\
+     -lfftw3.3\
+     -lfftw3f\
+     -lfftw3f_threads
 
 
-    DEPENDPATH += /usr/local/include/opencv4
+    DEPENDPATH += /usr/local/include/opencv4\
+    /usr/local/include
 }
