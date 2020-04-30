@@ -12,7 +12,7 @@
 #include "opencvutils.h"
 #include "advector.h"
 #include "gpos.h"
-
+#include "fft_fsolver.h"
 
 using namespace std;
 int main(int argc, char *argv[])
@@ -72,6 +72,12 @@ int main(int argc, char *argv[])
     advectedFrames.push_back(gpos_cur.getGuide());
     Mat i1, i2;
     Mat2f out;
+    Mat3b b1, b2;
+    Mat3f gx, gy;
+    vector<Mat> rgbChannels(3);
+    vector<Mat> gradX(3);
+    vector<Mat> gradY(3);
+
     for (uint i = 0; i < inputFrames.size() - 1; i++) {
         i1 = qimage_to_mat_ref((*inputFrames.at(i)));
         i2 = qimage_to_mat_ref((*inputFrames.at(i + 1)));
@@ -79,10 +85,32 @@ int main(int argc, char *argv[])
         cvtColor(i1, i1, COLOR_BGRA2BGR);
         cvtColor(i2, i2, COLOR_BGRA2BGR);
 
-        std::cout << "flow #" << to_string(i) <<  " calculated" << std::endl;
-        out = calculateFlow(i1, i2, false, false);
-        gpos_cur.advect(mask, out);
-        advectedFrames.push_back(gpos_cur.getGuide());
+        b1 = static_cast<Mat3b>(i1);
+        b2 = static_cast<Mat3b>(i2);
+
+        cv::split(b1, rgbChannels);
+        for (int i = 0; i < 3; i++) {
+            cv::Sobel(rgbChannels.at(i), gradX.at(i), CV_32F, 1, 0);
+            cv::Sobel(rgbChannels.at(i), gradY.at(i), CV_32F, 0, 1);
+        }
+
+        cv::merge(gradX, gx);
+        cv::merge(gradY, gy);
+        cv::imshow("gx_b", gradX.at(0));
+        cv::imshow("gy_b", gradY.at(0));
+        cv::imshow("b1 pre", b1);
+        cv::imshow("b2 pre", b2);
+        cv::waitKey(0);
+
+
+        fourierSolve(b1, gx, gy, 1);
+        cv::imshow("solved", b1);
+        cv::waitKey(0);
+
+//        std::cout << "flow #" << to_string(i) <<  " calculated" << std::endl;
+//        out = calculateFlow(i1, i2, false, false);
+//        gpos_cur.advect(mask, out);
+//        advectedFrames.push_back(gpos_cur.getGuide());
     }
     ioHandler.exportImages(advectedFrames, QDir("./gpos_inpaint"));
 
