@@ -12,8 +12,8 @@ public:
 
     virtual ~Guide();
 
-protected:
-    virtual std::shared_ptr<QImage> getGuide() = 0;
+//protected:
+//    virtual QString getGuide() = 0;
 };
 
 #endif // GUIDE_H

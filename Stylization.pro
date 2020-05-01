@@ -27,6 +27,7 @@ SOURCES += src/main.cpp \
     src/gtemp.cpp \
     src/stylizer.cpp \
     src/iohandler.cpp \
+    src/RGBA.cpp \
     src/opencvutils.cpp \
     src/advector.cpp \
     src/fft_fsolver.cpp
@@ -38,6 +39,7 @@ HEADERS += src/guide.h \
     src/gtemp.h \
     src/stylizer.h \
     src/iohandler.h \
+    src/RGBA.h \
     src/optical-flow/simpleflow.h \
     src/opencvutils.h \
     src/advector.h \
@@ -68,7 +70,6 @@ macx {
      -lfftw3.3\
      -lfftw3f\
      -lfftw3f_threads
-
 
     DEPENDPATH += /usr/local/include/opencv4\
     /usr/local/include

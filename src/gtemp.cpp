@@ -1,20 +1,45 @@
 #include "gtemp.h"
+#include "advector.h"
+#include <iostream>
 
-GTemp::GTemp(std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame, std::shared_ptr<QImage> keyFrame, std::shared_ptr<QImage> motionField, std::shared_ptr<QImage> prevOut) :
-    Guide(currFrame),
-    m_guide(nullptr)
+GTemp::GTemp() :
+    Guide(nullptr),
+    m_guide(nullptr),
+    m_advector()
 {
-    createTemp();
 }
 
-GTemp::~GTemp(){
+GTemp::GTemp(std::shared_ptr<QImage> prevStylizedFrame,
+             cv::Mat& motionField,
+             std::shared_ptr<QImage> mask) :
+    Guide(nullptr),
+    m_guide(nullptr),
+    m_advector()
+{
+    updateGuide(prevStylizedFrame, motionField, mask);
+}
+
+GTemp::~GTemp()
+{
     m_guide = nullptr;
 }
 
-std::shared_ptr<QImage> GTemp::getGuide(){
-    return m_guide;
+QString GTemp::getGuide(int i)
+{
+    QString filename("./guides/temp");
+    filename.append(QString::number(i));
+    filename.append(".png");
+    m_guide->save(filename, nullptr, 100);
+    return filename;
 }
 
-void GTemp::createTemp(){
-
+// Recompute guide given mask, optical flow field, and previous stylized frame
+void GTemp::updateGuide(std::shared_ptr<QImage> prevStylizedFrame,
+                        cv::Mat& motionField,
+                        std::shared_ptr<QImage> mask)
+{
+    std::shared_ptr<QImage> newFrame(new QImage(*prevStylizedFrame));
+    m_advector.advect(motionField, mask, prevStylizedFrame, newFrame);
+    m_guide = newFrame;
 }
+
