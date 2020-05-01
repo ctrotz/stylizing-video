@@ -12,25 +12,31 @@ using namespace cv;
 
 HistogramBlender::HistogramBlender() {}
 
-void HistogramBlender::blend(const std::vector<std::shared_ptr<QString>> &seqA,
-                 const std::vector<std::shared_ptr<QString>> &seqB,
+void HistogramBlender::blend(const std::vector<QString> &seqA,
+                 const std::vector<QString> &seqB,
                  const std::vector<Mat1f> &errMask,
                  std::vector<std::shared_ptr<QImage>> &outBlend)
 {
-    for (uint i = 0; i < seqA.size(); ++i) {
+    // for (uint i = 0; i < seqA.size(); ++i) {
         // Read in images
-        Mat Oai_bgr = imread(seqA.at(i)->toStdString(), cv::IMREAD_COLOR);
-        Mat Obi_bgr = imread(seqB.at(i)->toStdString(), cv::IMREAD_COLOR);
+        // Mat Oai_bgr = imread(seqA.at(i).toStdString(), cv::IMREAD_COLOR);
+        // Mat Obi_bgr = imread(seqB.at(i).toStdString(), cv::IMREAD_COLOR);
+        
+        Mat Oai_bgr = imread("/Users/isamilefchik/CodeLand/cs2240/final/stylizing-video-2240/data/woodtex.jpg");
+        Mat Obi_bgr = imread("/Users/isamilefchik/CodeLand/cs2240/final/stylizing-video-2240/data/woodtex2.jpg");
+
+        imshow("Oai", Oai_bgr);
+        imshow("Obi", Obi_bgr);
 
         // Convert to Lab color space
-        Mat Oai_lab(Oai_bgr);
-        Mat Obi_lab(Obi_bgr);
+        Mat Oai_lab = Oai_bgr.clone();
+        Mat Obi_lab = Obi_bgr.clone();
         cvtColor(Oai_bgr, Oai_lab, COLOR_BGR2Lab);
         cvtColor(Obi_bgr, Obi_lab, COLOR_BGR2Lab);
 
         // Assemble minimum error image
-        Mat minErrorImg(Oai_lab);
-        assembleMinErrorImg(Oai_lab, Obi_lab, errMask.at(i), minErrorImg);
+        Mat minErrorImg = Oai_lab.clone();
+        // assembleMinErrorImg(Oai_lab, Obi_lab, errMask.at(i), minErrorImg);
 
         // Compute mean and std of images
         float Oai_mean[3];
@@ -52,8 +58,8 @@ void HistogramBlender::blend(const std::vector<std::shared_ptr<QString>> &seqA,
         float t_std[3] = {t_stdVal, t_stdVal, t_stdVal};
 
         // Gaussianize Oai and Oab
-        Mat Oai_t(Oai_lab);
-        Mat Obi_t(Obi_lab);
+        Mat Oai_t = Oai_lab.clone();
+        Mat Obi_t = Obi_lab.clone();
         histogramTransform(Oai_lab, Oai_mean, Oai_std, t_mean, t_std, Oai_t);
         histogramTransform(Obi_lab, Obi_mean, Obi_std, t_mean, t_std, Obi_t);
 
@@ -61,20 +67,27 @@ void HistogramBlender::blend(const std::vector<std::shared_ptr<QString>> &seqA,
         Mat Oabi_t = (((0.5f * (Oai_t + Obi_t)) - t_meanVal) / 0.5f) + t_meanVal;
 
         // Transform back to minError histogram
-        Mat Oabi(Oabi_t);
+        Mat Oabi = Oabi_t.clone();
         float Oabi_t_mean[3];
         float Oabi_t_std[3];
         computeMeanAndStd(Oabi_t, Oabi_t_mean, Oabi_t_std);
         histogramTransform(Oabi_t, Oabi_t_mean, Oabi_t_std, minError_mean, minError_std, Oabi);
 
         // Covert to RGB
-        Mat Oabi_rgb(Oabi);
-        cvtColor(Oabi, Oabi_rgb, COLOR_Lab2RGB);
+        Mat Oabi_rgb = Oabi.clone();
+        Mat Oabi_bgr = Oabi.clone();
+        cvtColor(Oabi, Oabi_bgr, COLOR_Lab2BGR);
+
+        imshow("Histogram Blend", Oabi_bgr);
+
+        Mat linBlend = (0.5 * Oai_bgr) + (0.5 * Obi_bgr);
+        imshow("Linear blend", linBlend);
+        waitKey(0);
 
         outBlend.push_back(
                 std::shared_ptr<QImage>(
                     new QImage(mat_to_qimage_ref(Oabi, QImage::Format_RGB16))));
-    }
+    // }
 }
 
 void HistogramBlender::computeMeanAndStd(const Mat &img, float *mean, float *std)
@@ -85,11 +98,11 @@ void HistogramBlender::computeMeanAndStd(const Mat &img, float *mean, float *std
     // Calculate mean
     for (int i = 0; i < img.rows; ++i) {
         for (int j = 0; j < img.cols; ++j) {
-		Vec3b curPixel = img.at<Vec3b>(i, j);
+        Vec3b curPixel = img.at<Vec3b>(i, j);
 
-		for (int k = 0; k < 3; ++k) {
-			sum[k] += curPixel[k];
-	    }
+        for (int k = 0; k < 3; ++k) {
+            sum[k] += curPixel[k];
+        }
         }
     }
     mean[0] = sum[0] / n;
@@ -132,8 +145,9 @@ void HistogramBlender::assembleMinErrorImg(const Mat &Oai, const Mat &Obi,
 }
 
 // Method derived from Reinhard et al. (2001) "Color Transfer between Images"
-void HistogramBlender::histogramTransform(const Mat &inputImg, float *inputMean, float *inputStd,
-                                          float *refMean, float *refStd, Mat &outputImg)
+void HistogramBlender::histogramTransform(const Mat &inputImg, float *inputMean,
+                                          float *inputStd, float *targetMean,
+                                          float *targetStd, Mat &outputImg)
 {
     for (int i = 0; i < inputImg.rows; ++i) {
         for (int j = 0; j < inputImg.cols; ++j) {
@@ -143,12 +157,16 @@ void HistogramBlender::histogramTransform(const Mat &inputImg, float *inputMean,
             for (int k = 0; k < 3; ++k) {
                 float x = inputPixel[k];
                 x -= inputMean[k];
-                x *= refStd[k] / inputStd[k];
-                x += refMean[k];
-                outPixel[k] = static_cast<int>(round(x));
+                x *= targetStd[k] / inputStd[k];
+                // x *= inputStd[k] / targetStd[k];
+                x += targetMean[k];
+                x = round(x);
+                x = std::clamp(x, 0.f, 255.f);
+                outPixel[k] = static_cast<int>(x);
             }
 
             outputImg.at<Vec3b>(i, j) = outPixel;
+            // std::cout << outPixel << std::endl;
         }
     }
 }

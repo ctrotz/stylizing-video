@@ -10,8 +10,8 @@ class HistogramBlender
 public:
     HistogramBlender();
 
-    void blend(const std::vector<std::shared_ptr<QString>> &seqA,
-               const std::vector<std::shared_ptr<QString>> &seqB,
+    void blend(const std::vector<QString> &seqA,
+               const std::vector<QString> &seqB,
                const std::vector<cv::Mat1f> &errMask,
                std::vector<std::shared_ptr<QImage>> &outBlend);
 

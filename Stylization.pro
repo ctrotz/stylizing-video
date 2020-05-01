@@ -29,7 +29,8 @@ SOURCES += src/main.cpp \
     src/iohandler.cpp \
     src/RGBA.cpp \
     src/opencvutils.cpp \
-    src/advector.cpp
+    src/advector.cpp \
+    src/histogramblend.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
@@ -41,7 +42,8 @@ HEADERS += src/guide.h \
     src/RGBA.h \
     src/optical-flow/simpleflow.h \
     src/opencvutils.h \
-    src/advector.h
+    src/advector.h \
+    src/histogramblend.h
 
 INCLUDEPATH += lib/
 macx {
