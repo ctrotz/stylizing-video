@@ -83,7 +83,7 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::fetchGuides(int 
     errorpaths.reserve(abs(end-beg) + 1);
 //    Mat i1, i2;
     for (int i = beg+step; i != end; i+=step){
-//        if (step > 0){
+        if (step > 0){
 //            i1 = qimage_to_mat_ref((*m_frames.at(i-step)));
 //            i2 = qimage_to_mat_ref((*m_frames.at(i)));
 
@@ -91,11 +91,11 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::fetchGuides(int 
 //            cvtColor(i2, i2, COLOR_BGRA2BGR);
 
 //            Mat2f out = calculateFlow(i1, i2, false, false);
-//            std::string filename = "flowfields/" + std::to_string(i) + ".matbin";
+            std::string filename = "flowfields/" + std::to_string(i) + ".matbin";
 //            serializeMatbin(out, filename);
 //            m_advects.push_back(out);
-//            m_flowpaths.push_back(filename);
-//        }
+            m_flowpaths.push_back(filename);
+        }
         QString frame = QString::number(i).rightJustified(3, '0');
         QString prefix("outtest/" + QString::number(keyIdx) + "-" + frame );
         QString outfile(prefix+".png");
