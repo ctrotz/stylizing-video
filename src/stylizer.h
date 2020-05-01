@@ -14,7 +14,7 @@ class Stylizer {
 public:
     Stylizer(std::vector<std::shared_ptr<QImage>> inputFrames, std::vector<std::shared_ptr<QImage>> keyFrames, IOHandler &io);
     virtual ~Stylizer();
-    std::vector<QString> generateGuides(std::shared_ptr<QImage> key, int keyIdx, int beg, int end, int step);
+   std::pair<std::vector<QString>, std::vector<QString>> generateGuides(std::shared_ptr<QImage> key, int keyIdx, int beg, int end, int step);
     void run();
 private:
 //    void generateGuides(std::shared_ptr<QImage> keyFrame, std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame);
@@ -27,7 +27,8 @@ private:
 //    std::shared_ptr<QImage> g_edge;
 //    std::shared_ptr<QImage> g_mask;
 //    std::shared_ptr<QImage> g_pos;
-//    std::shared_ptr<QImage> g_temp;
+    //    std::shared_ptr<QImage> g_temp;
+    std::vector<float> loadError(QString &binary);
 };
 
 

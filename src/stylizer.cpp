@@ -1,6 +1,7 @@
 #include "stylizer.h"
 #include "opencvutils.h"
 #include "optical-flow/simpleflow.h"
+#include "serialize.h"
 
 using namespace std;
 
@@ -19,17 +20,27 @@ void Stylizer::run(){
         int beg = m_io.getKeyframeNum(i);
         int end = m_io.getKeyframeNum(i+1);
         // treat beg/end as indices for input frames
-        std::vector<QString> a;
-        std::vector<QString> b;
-        a = generateGuides(m_keys.at(i), i, beg, end, 1);
+        std::pair<std::vector<QString>, std::vector<QString>> a;
+        std::pair<std::vector<QString>, std::vector<QString>> b;
+         a = generateGuides(m_keys.at(i), i, beg, end, 1);
         b = generateGuides(m_keys.at(i+1), i+1, end, beg, -1);
         //blend a and b-- NOTE: a and b will be missing the keyframes-- just substitute in keyframes instead of blending
     }
 }
 
-std::vector<QString> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int keyIdx, int beg, int end, int step) {
+std::vector<float> Stylizer::loadError(QString& binary) {
+    std::vector<float> out;
+     std::ifstream in =  std::ifstream(binary.toStdString(), std::ifstream::binary);
+    deserialize(in, out);
+    return out;
+}
+
+std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int keyIdx, int beg, int end, int step) {
     std::vector<QString> outpaths;
     outpaths.reserve(abs(end-beg) + 1);
+    std::vector<QString> errorpaths;
+    errorpaths.reserve(abs(end-beg) + 1);
+
     QString prevEdge;
 
     std::shared_ptr<QImage> key(new QImage(*keyframe));
@@ -62,13 +73,6 @@ std::vector<QString> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int k
         edge.updateFrame(frame2);
         QString g_edge2 = edge.getGuide(i);
 
-//        std::shared_ptr<QImage> frame1m(new QImage(m_frames(i)->copy()));
-//        std::shared_ptr<QImage> frame2m(new QImage(m_frames(i+step)->copy()));
-//        GMask mask(frame1m);
-//        QString g_mask1 = mask->getGuide();
-//        mask->updateFrame(frame2m);
-//        QString g_mask2 = mask->getGuide();
-
         i1 = qimage_to_mat_ref((*m_frames.at(i-step)));
         i2 = qimage_to_mat_ref((*m_frames.at(i)));
 
@@ -96,8 +100,9 @@ std::vector<QString> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int k
 
         command.append("-guide ../." + prevTemp + " ../." + g_temp2 + " -weight 0.5 ");
 
-        QString outfile("outtest/" + QString::number(keyIdx) + "-" + frame + ".png");
+        QString prefix("outtest/" + QString::number(keyIdx) + "-" + frame );
 
+        QString outfile(prefix+".png");
         command.append("-output ../../" + outfile);
 
         command.append(" -searchvoteiters 12 -patchmatchiters 6");
@@ -107,7 +112,9 @@ std::vector<QString> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int k
 //        std::system(c_str);
         std::cout << c_str << std::endl;
         prevStylizedFrame = std::make_shared<QImage>(outfile);
+
         outpaths.push_back(outfile);
+        errorpaths.push_back(prefix + ".bin");
     }
-    return outpaths;
+    return {outpaths,errorpaths};
 }
