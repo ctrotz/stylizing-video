@@ -1,3 +1,4 @@
+
 [submodule "deps/ebsynth"]
 	path = deps/ebsynth
-	url = https://github.com/jamriska/ebsynth.git
+	url = https://github.com/ctrotz/ebsynth.git
