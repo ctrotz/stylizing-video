@@ -38,18 +38,16 @@ void Advector::advectMask(const cv::Mat2f& flowField, cv::Mat& inMask, cv::Mat& 
 
     uint8_t *maskData = outMask.data;
 
+    int index = 0;
     for (int r = 0; r < imgH; ++r) {
         for (int c = 0; c < imgW; ++c) {
             cv::Vec2f u = flowField.at<cv::Vec2f>(r, c);
 
             cv::Vec2f prevPos = cv::Vec2f({static_cast<float>(c), static_cast<float>(r)}) - u;
 
-            float interpColor = bilinearInterpolateMask(inMask, prevPos);
-//            std::cout << r << " " << c << " " << interpColor << std::endl;
-//            std::cout << "before: " << outMask.at<float>(r,c) << std::endl;
-//            outMask.at<float>(r,c) = interpColor;
-            maskData[r*imgW + c] = interpColor;
-//            std::cout << "after: " << outMask.at<float>(r,c) << std::endl;
+            int interpColor = bilinearInterpolateMask(inMask, prevPos);
+            maskData[index] = interpColor;
+            index++;
         }
     }
 }
@@ -78,17 +76,16 @@ float Advector::bilinearInterpolateMask(cv::Mat& img, cv::Vec2f pos)
     float f22 = 0;
 
     if (isInBoundsMask(x1, y1, img)) {
-        f11 = img.at<float>(x1, y1);
+        f11 = img.at<uchar>(y1, x1);
     }
     if (isInBoundsMask(x1, y2, img)) {
-        f12 = img.at<float>(x1, y2);
+        f12 = img.at<uchar>(y2, x1);
     }
     if (isInBoundsMask(x2, y1, img)) {
-//        std::cout << img.cols << std::endl;
-        f21 = img.at<float>(x2, y1);
+        f21 = img.at<uchar>(y1, x2);
     }
     if (isInBoundsMask(x2, y2, img)) {
-        f22 = img.at<float>(x2, y2);
+        f22 = img.at<uchar>(y2, x2);
     }
 
     float scale = 1.f / static_cast<float>((x2-x1)*(y2-y1));
@@ -106,7 +103,7 @@ float Advector::bilinearInterpolateMask(cv::Mat& img, cv::Vec2f pos)
     outColor = scale * xMat * colorMat * yMat;
     outColor = std::clamp(outColor, 0.f, 1.f);
 
-    float returnColor = std::round(outColor);
+    int returnColor = std::round(outColor);
     return returnColor;
 }
 

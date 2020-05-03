@@ -30,7 +30,8 @@ SOURCES += src/main.cpp \
     src/RGBA.cpp \
     src/opencvutils.cpp \
     src/advector.cpp \
-    src/fft_fsolver.cpp
+    src/fft_fsolver.cpp \
+    src/histogramblend.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
@@ -43,7 +44,8 @@ HEADERS += src/guide.h \
     src/optical-flow/simpleflow.h \
     src/opencvutils.h \
     src/advector.h \
-    src/fft_fsolver.h
+    src/fft_fsolver.h \
+    src/histogramblend.h
 
 INCLUDEPATH += lib/
 INCLUDEPATH += deps/ebsynth/include
