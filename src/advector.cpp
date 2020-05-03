@@ -29,6 +29,84 @@ void Advector::advect(const cv::Mat2f& flowField, std::shared_ptr<QImage> mask,
     }
 }
 
+void Advector::advectMask(const cv::Mat2f& flowField, cv::Mat& inMask, cv::Mat& outMask)
+{
+    assert(inMask.size() == outMask.size());
+
+    int imgH = outMask.rows;
+    int imgW = outMask.cols;
+
+    uint8_t *maskData = outMask.data;
+
+    int index = 0;
+    for (int r = 0; r < imgH; ++r) {
+        for (int c = 0; c < imgW; ++c) {
+            cv::Vec2f u = flowField.at<cv::Vec2f>(r, c);
+
+            cv::Vec2f prevPos = cv::Vec2f({static_cast<float>(c), static_cast<float>(r)}) - u;
+
+            int interpColor = bilinearInterpolateMask(inMask, prevPos);
+            maskData[index] = interpColor;
+            index++;
+        }
+    }
+}
+
+float Advector::bilinearInterpolateMask(cv::Mat& img, cv::Vec2f pos)
+{
+    float x = pos[0];
+    float y = pos[1];
+
+    // If x or y is exactly an integer coordinate, move it a negligible
+    // amount to avoid NaNs in interpolation equation
+    if (x == std::floor(x)) x += 1e-4;
+    if (y == std::floor(y)) y += 1e-4;
+
+    // Algorithm of bilinear interpolation derived from:
+    // https://en.wikipedia.org/wiki/Bilinear_interpolation
+
+    int x1 = std::floor(x);
+    int x2 = std::ceil(x);
+    int y1 = std::floor(y);
+    int y2 = std::ceil(y);
+
+    float f11 = 0;
+    float f12 = 0;
+    float f21 = 0;
+    float f22 = 0;
+
+    if (isInBoundsMask(x1, y1, img)) {
+        f11 = img.at<uchar>(y1, x1);
+    }
+    if (isInBoundsMask(x1, y2, img)) {
+        f12 = img.at<uchar>(y2, x1);
+    }
+    if (isInBoundsMask(x2, y1, img)) {
+        f21 = img.at<uchar>(y1, x2);
+    }
+    if (isInBoundsMask(x2, y2, img)) {
+        f22 = img.at<uchar>(y2, x2);
+    }
+
+    float scale = 1.f / static_cast<float>((x2-x1)*(y2-y1));
+
+    Eigen::Matrix<float, 1, 2> xMat;
+    xMat << x2-x, x-x1;
+
+    Eigen::Matrix<float, 2, 1> yMat;
+    yMat << y2-y, y-y1;
+
+    float outColor = 0;
+    Eigen::Matrix<float, 2, 2> colorMat;
+    colorMat << f11, f12, f21, f22;
+
+    outColor = scale * xMat * colorMat * yMat;
+    outColor = std::clamp(outColor, 0.f, 1.f);
+
+    int returnColor = std::round(outColor);
+    return returnColor;
+}
+
 QColor Advector::bilinearInterpolate(std::shared_ptr<QImage> img,
                                      std::shared_ptr<QImage> mask,
                                      cv::Vec2f pos)
@@ -104,4 +182,11 @@ bool Advector::isInBounds(int x, int y, std::shared_ptr<QImage> img,
     if (x < 0 || x >= img->width()) return false;
     if (y < 0 || y >= img->height()) return false;
     return mask->pixel(x, y) != 0;
+}
+
+bool Advector::isInBoundsMask(int x, int y, cv::Mat& img)
+{
+    if (x < 0 || x >= img.cols) return false;
+    if (y < 0 || y >= img.rows) return false;
+    return true;
 }
