@@ -1,5 +1,6 @@
 #include "fft_fsolver.h"
 #include "fftw3.h"
+#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #define NUM_OF_THREADS 1 //set number of threads to number of available processors
 
@@ -9,12 +10,24 @@
  */
 
 
-void fourierSolve(cv::Mat3b& imgData, cv::Mat3f& imgGradX, cv::Mat3f& imgGradY, float dataCost)
+void fourierSolve(cv::Mat3b& imgData, const cv::Mat3f& imgGradX, const cv::Mat3f& imgGradY, float dataCost)
 {
     cv::Mat gx, gy;
 
-    cv::normalize(imgGradX.reshape(1), gx, 1, 0);
-    cv::normalize(imgGradY.reshape(1), gy, 1, 0);
+//    std::vector<cv::Mat> xChannels(3);
+//    std::vector<cv::Mat> yChannels(3);
+
+//    cv::split(imgGradX, xChannels);
+//    cv::split(imgGradY, yChannels);
+
+
+    cv::normalize(imgGradX.reshape(1), gx, 1, 0, cv::NORM_MINMAX);
+    cv::normalize(imgGradY.reshape(1), gy, 1, 0, cv::NORM_MINMAX);
+
+    cv::Mat xColor, yColor;
+//    double min,max;
+//    cv::minMaxLoc(gx, &min, &max);
+//    std::cout << "gx: " << gx << std::endl;
 
     std::vector<float> gradX;
     if (gx.isContinuous()) {
@@ -137,7 +150,7 @@ void fourierSolve(cv::Mat3b& imgData, cv::Mat3f& imgGradX, cv::Mat3f& imgGradY, 
         pixelAddr = iChannel;
         for(int iNode = 0; iNode < nodeCount; iNode++, pixelAddr += imgData.channels())
         {
-            imgData.data[pixelAddr] = static_cast<uchar>(fftBuff[iNode] / fftDenom * 255.0f);
+            imgData.data[pixelAddr] = static_cast<uchar>(std::min(255.0f, std::max(fftBuff[iNode] / fftDenom * 255.0f, 0.0f)));
         }
     }
 

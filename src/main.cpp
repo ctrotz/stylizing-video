@@ -67,36 +67,7 @@ int main(int argc, char *argv[])
 
     Stylizer style(inputFrames, keyframes, ioHandler);
 //    style.generateGuides();
-//    style.run();
-
-    cv::Mat3b g_pos; 
-    cv::Mat g_mask;
-    cv::Mat3f gx, gy;
-    g_mask = cv::imread("/Users/ctrotz/Downloads/test_mask.png", cv::IMREAD_GRAYSCALE);
-    cv::imshow("g_mask", g_mask);
-    cv::waitKey(0);
-    cv::cvtColor(cv::imread("/Users/ctrotz/Downloads/test.png"), g_pos, cv::COLOR_BGRA2BGR);
-//    cv::cvtColor(g_mask, g_mask, cv::COLOR_BGRA2GRAY);
-    cv::bitwise_not(g_mask, g_mask);
-
-    vector<Mat> rgbChannels(3);
-    vector<Mat> gradX(3);
-    vector<Mat> gradY(3);
-    cv::split(g_pos, rgbChannels);
-    for (int i = 0; i < 3; i++) {
-        cv::Sobel(rgbChannels.at(i), gradX.at(i), CV_32F, 1, 0);
-        cv::bitwise_and(gradX.at(i), g_mask, gradX.at(i));
-        cv::Sobel(rgbChannels.at(i), gradY.at(i), CV_32F, 0, 1);
-        cv::bitwise_and(gradY.at(i), g_mask, gradY.at(i));
-
-    }
-
-    cv::merge(gradX, gx);
-    cv::merge(gradY, gy);
-    fourierSolve(g_pos, gx, gy, 0.1);
-    cv::imshow("solved", g_pos);
-    cv::waitKey(0);
-
+    style.run();
     a.exit();
 
 
