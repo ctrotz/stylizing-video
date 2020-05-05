@@ -1,5 +1,6 @@
 #include "stylizer.h"
 #include "opencv2/core/mat.hpp"
+#include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencvutils.h"
 #include "optical-flow/simpleflow.h"
@@ -100,7 +101,9 @@ void Stylizer::poissonBlend(std::vector<cv::Mat> &hp_blends, const std::vector<c
 	cv::Mat3b currentFrame;
 	for (uint i = 0; i < hp_blends.size(); ++i) {
 		currentFrame = static_cast<cv::Mat3b>(hp_blends.at(i));
-        	fourierSolve(currentFrame, gradX.at(i), gradY.at(i), 0.1);
+		//cv::imshow("pre-solve", currentFrame);
+		//cv::waitKey(0);
+		fourierSolve(currentFrame, gradX.at(i), gradY.at(i), 0.1);
 		final_blends.push_back(currentFrame);
 	}
 }	

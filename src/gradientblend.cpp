@@ -2,6 +2,7 @@
 #include "opencv2/core.hpp"
 #include "opencv2/core/base.hpp"
 #include "opencv2/core/hal/interface.h"
+#include "opencv2/core/types.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
@@ -19,17 +20,14 @@ void GradientBlender::blend(const std::vector<QString> &seqA, const std::vector<
 		cv::Mat Oai = imread(seqA.at(i).toStdString(), cv::IMREAD_COLOR);
 		cv::Mat Obi = imread(seqB.at(i).toStdString(), cv::IMREAD_COLOR);
 		
-		std::cout << "images read in" << std::endl;
         	assert(Oai.channels() == 3 && Obi.channels() == 3);
 		cv::Mat3f gradXA, gradYA, gradXB, gradYB;
 		generateGradient(Oai, gradXA, gradYA);	
 		generateGradient(Obi, gradXB, gradYB);
-		std::cout << "gradient generated" << std::endl;
 		cv::Mat3f gradXMin, gradYMin;
 		assembleMinErrorGradient(gradXA, gradYA, gradXB, gradYB, errMask.at(i), gradXMin, gradYMin);
 		outBlendX.push_back(gradXMin);
 		outBlendY.push_back(gradYMin);
-		std::cout << "main task done, time to imshow" << std::endl;
 
 		//// DEBUG 
 		//std::vector<Mat1f> gx, gy;
@@ -56,16 +54,25 @@ void GradientBlender::generateGradient(const cv::Mat &img, cv::Mat3f &gradientX,
 	for (uint i = 0; i < bgrChannels.size(); ++i) {
         cv::Sobel(bgrChannels.at(i), gradX.at(i), CV_32F, 1, 0, 3, 1/8.f, 0, cv::BORDER_REFLECT);
         cv::Sobel(bgrChannels.at(i), gradY.at(i), CV_32F, 0, 1, 3, 1/8.f, 0, cv::BORDER_REFLECT);
+
+//        cv::Mat xdisp, ydisp;
+//	cv::convertScaleAbs(gradX.at(i), xdisp);
+//	cv::convertScaleAbs(gradY.at(i), ydisp);
+//
+//	cv::copyMakeBorder(xdisp, xdisp, 50, 50, 50, 50, cv::BORDER_CONSTANT, Scalar(0, 0, 0));	
+//	cv::copyMakeBorder(ydisp, ydisp, 50, 50, 50, 50, cv::BORDER_CONSTANT, Scalar(0, 0, 0));
+//	
+//	cv::imshow("gx", xdisp);
+//	cv::imshow("gy", ydisp);
+//	cv::waitKey(0);
+//
         double min,max;
         cv::minMaxLoc(gradX.at(i),& min, &max);
-        std::cout << "min: " << std::to_string(min) << " max: " << std::to_string(max) << std::endl;
 	}
 
 
-	std::cout << "made it past sobel" << std::endl;
 	cv::merge(gradX, gradientX);
 	cv::merge(gradY, gradientY);
-	std::cout << "made it past merge" << std::endl;
 
 }
 
