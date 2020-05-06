@@ -29,6 +29,9 @@ private:
 
     std::vector<float> loadError(QString &binary);
     std::vector<cv::Mat> tempCoherence(std::vector<cv::Mat> masks);
+
+    void poissonBlend(std::vector<cv::Mat> &hp_blends, const std::vector<cv::Mat3f> &gradX, const std::vector<cv::Mat3f> &gradY, std::vector<cv::Mat> &out_frames); 
+
 };
 
 

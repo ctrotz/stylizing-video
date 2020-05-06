@@ -1,5 +1,7 @@
 #include "fft_fsolver.h"
 #include "fftw3.h"
+#include "opencv2/core/saturate.hpp"
+#include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 #define NUM_OF_THREADS 1 //set number of threads to number of available processors
 
@@ -9,12 +11,26 @@
  */
 
 
-void fourierSolve(cv::Mat3b& imgData, cv::Mat3f& imgGradX, cv::Mat3f& imgGradY, float dataCost)
+void fourierSolve(cv::Mat3b& imgData, const cv::Mat3f& imgGradX, const cv::Mat3f& imgGradY, float dataCost)
 {
     cv::Mat gx, gy;
 
-    cv::normalize(imgGradX.reshape(1), gx, 1, 0);
-    cv::normalize(imgGradY.reshape(1), gy, 1, 0);
+//    std::vector<cv::Mat> xChannels(3);
+//    std::vector<cv::Mat> yChannels(3);
+
+//    cv::split(imgGradX, xChannels);
+//    cv::split(imgGradY, yChannels);
+
+
+//    cv::normalize(imgGradX.reshape(1), gx, -0.5, 0.5, cv::NORM_MINMAX);
+//    cv::normalize(imgGradY.reshape(1), gy, -0.5, 0.5, cv::NORM_MINMAX);
+ 
+    gx = imgGradX.reshape(1);
+    gy = imgGradY.reshape(1);
+    cv::Mat xColor, yColor;
+//    double min,max;
+//    cv::minMaxLoc(gx, &min, &max);
+//    std::cout << "gx: " << gx << std::endl;
 
     std::vector<float> gradX;
     if (gx.isContinuous()) {
@@ -25,9 +41,7 @@ void fourierSolve(cv::Mat3b& imgData, cv::Mat3f& imgGradX, cv::Mat3f& imgGradY, 
         gradX.insert(gradX.end(), gx.ptr<float>(i), gx.ptr<float>(i)+gx.cols);
       }
     }
-    std::cout << "channels: " << imgData.channels() << std::endl;
 
-    std::cout << "gradient x size: " << gradX.size() << " expected size: " << std::to_string(imgData.rows * imgData.cols * imgData.channels()) << std::endl;
 
     std::vector<float> gradY;
     if (gy.isContinuous()) {
@@ -38,7 +52,6 @@ void fourierSolve(cv::Mat3b& imgData, cv::Mat3f& imgGradX, cv::Mat3f& imgGradY, 
         gradY.insert(gradY.end(), gy.ptr<float>(i), gy.ptr<float>(i)+gy.cols);
       }
     }
-    std::cout << "gradient y size: " << gradY.size() << " expected size: " << std::to_string(imgData.rows * imgData.cols * imgData.channels()) << std::endl;
 
 
     int retVal = fftwf_init_threads();
@@ -94,9 +107,9 @@ void fourierSolve(cv::Mat3b& imgData, cv::Mat3f& imgGradX, cv::Mat3f& imgGradY, 
                 dcMult *= 2.0f;
             if((y > 0) && (y < imgData.rows - 1))
                 dcMult *= 2.0f;
-            dcSum += dcMult * static_cast<float>(imgData.data[pixelAddr])/255.0f;
+            dcSum += dcMult * static_cast<float>(imgData.data[pixelAddr]);
 
-            fftBuff[nodeAddr] = dataCost * static_cast<float>(imgData.data[pixelAddr])/255.0f;;
+            fftBuff[nodeAddr] = dataCost * static_cast<float>(imgData.data[pixelAddr]);
 
             // Subtract g^x_x and g^y_y, with boundary factor of -2.0 to account for boundary reflections implicit in the DCT
             if((x > 0) && (x < imgData.cols - 1))
@@ -137,7 +150,7 @@ void fourierSolve(cv::Mat3b& imgData, cv::Mat3f& imgGradX, cv::Mat3f& imgGradY, 
         pixelAddr = iChannel;
         for(int iNode = 0; iNode < nodeCount; iNode++, pixelAddr += imgData.channels())
         {
-            imgData.data[pixelAddr] = static_cast<uchar>(fftBuff[iNode] / fftDenom * 255.0f);
+            imgData.data[pixelAddr] = cv::saturate_cast<uchar>(fftBuff[iNode] / fftDenom);
         }
     }
 

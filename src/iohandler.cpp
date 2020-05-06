@@ -132,8 +132,8 @@ void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,
 		}
 
         outPath = outPath.append("/").append(filename);
-
-        images.at(i)->save(outPath, "JPG");
+	std::cout << outPath.toStdString() << std::endl;
+	std::cout << images.at(i)->save(outPath, "JPG") << " for image " << i << std::endl;
     }
 }
 

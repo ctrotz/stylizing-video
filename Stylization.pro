@@ -31,7 +31,8 @@ SOURCES += src/main.cpp \
     src/opencvutils.cpp \
     src/advector.cpp \
     src/fft_fsolver.cpp \
-    src/histogramblend.cpp
+    src/histogramblend.cpp \
+    src/gradientblend.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
@@ -45,13 +46,15 @@ HEADERS += src/guide.h \
     src/opencvutils.h \
     src/advector.h \
     src/fft_fsolver.h \
-    src/histogramblend.h
+    src/histogramblend.h \
+    src/gradientblend.h
 
 INCLUDEPATH += lib/
 INCLUDEPATH += deps/ebsynth/include
 macx {
     INCLUDEPATH += /usr/local/include \
-     /usr/local/include/opencv4
+     /usr/local/include/opencv4\
+    /usr/local/opt/libffi/include
 
     LIBS += -L/usr/local/lib/\
      -lopencv_calib3d.4.3.0\
@@ -71,7 +74,8 @@ macx {
      -lopencv_optflow.4.3.0\
      -lfftw3.3\
      -lfftw3f\
-     -lfftw3f_threads
+     -lfftw3f_threads\
+    -L/usr/local/opt/libffi/lib
 
     DEPENDPATH += /usr/local/include/opencv4\
     /usr/local/include

@@ -116,7 +116,7 @@ void HistogramBlender::assembleMinErrorImg(const Mat &Oai, const Mat &Obi,
 {
     for (int i = 0; i < Oai.rows; ++i) {
         for (int j = 0; j < Oai.cols; ++j) {
-            if (errMask.at<uchar>(i, j) == 1) {
+            if (errMask.at<uchar>(i, j) == 0) {
                 minErrorImg.at<Vec3b>(i, j) = Oai.at<Vec3b>(i, j);
             } else {
                 minErrorImg.at<Vec3b>(i, j) = Obi.at<Vec3b>(i, j);
