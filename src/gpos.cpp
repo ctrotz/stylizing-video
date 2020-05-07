@@ -44,9 +44,14 @@ QString GPos::getGuide(int i){
 
 void GPos::advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField) {
     Advector advector = Advector();
+
     std::shared_ptr<QImage> advected = std::make_shared<QImage>(m_guide->width(), m_guide->height(), m_guide->format());
+
     advected->fill(Qt::white);
+
     advector.advect(flowField, g_mask, m_guide, advected);
+//    std::cout << "whoop d" << std::endl;
+
     m_guide = advected;
 
 //    cv::imshow("gpos", qimage_to_mat_ref((*m_guide)));

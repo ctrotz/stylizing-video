@@ -17,6 +17,7 @@ public:
     std::pair<std::vector<QString>, std::vector<QString>> generateGuides(std::shared_ptr<QImage> key, int keyIdx, int beg, int end, int step);
     std::pair<std::vector<QString>, std::vector<QString>> fetchGuides(int keyIdx, int beg, int end, int step);
     void run();
+    void runSingle();
     std::vector<cv::Mat> createMasks(std::pair<std::vector<QString>, std::vector<QString>> a, std::pair<std::vector<QString>, std::vector<QString>> b);
 private:
     std::vector<std::shared_ptr<QImage>> m_frames;

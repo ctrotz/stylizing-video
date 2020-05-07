@@ -8,7 +8,7 @@
 #include "gradientblend.h"
 #include "fft_fsolver.h"
 #include <iostream>
-#define GENERATE false
+#define GENERATE true
 
 using namespace std;
 
@@ -24,6 +24,29 @@ Stylizer::~Stylizer(){
 	m_advects.clear();
 }
 
+void Stylizer::runSingle(){
+    // store key paths to pass into histogram blender
+    QString key_a("./data/basterds/keys/120.png");
+
+//    int beg = m_io.getKeyframeNum(0);
+//    int end = 49;
+    int beg = 0;
+    int end = 216;
+    int mid = 120;
+
+    // treat beg/end as indices for input frames
+    std::pair<std::vector<QString>, std::vector<QString>> a;
+    std::pair<std::vector<QString>, std::vector<QString>> b;
+
+    // Only run generateGuides if you don't have the stylized frames saved to file!
+    if (GENERATE){
+        a = generateGuides(m_keys.at(0), 0, mid, beg, -1);
+        b = generateGuides(m_keys.at(0), 0, mid, end, 1);
+    } else {
+//        a = fetchGuides(i, beg, end, 1);
+    }
+}
+
 void Stylizer::run(){
 	HistogramBlender hb;
 	GradientBlender gb;
@@ -32,10 +55,10 @@ void Stylizer::run(){
 		// store key paths to pass into histogram blender
 		int keyNum_a =  m_io.getKeyframeNum(i);
 		QString keynum_a = QString::number(keyNum_a).rightJustified(3, '0');
-		QString key_a("./data/test/keys/" + keynum_a + ".jpg");
+        QString key_a("./data/test/keys/" + keynum_a + ".png");
 		int keyNum_b =  m_io.getKeyframeNum(i+1);
 		QString keynum_b = QString::number(keyNum_b).rightJustified(3, '0');
-		QString key_b("./data/test/keys/" + keynum_b + ".jpg");
+        QString key_b("./data/test/keys/" + keynum_b + ".png");
 
 		int beg = m_io.getKeyframeNum(i);
 		int end = m_io.getKeyframeNum(i+1);
@@ -224,13 +247,17 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 
 	QString prevEdge;
 
-	std::shared_ptr<QImage> key(new QImage(*keyframe));
+    std::shared_ptr<QImage> key(new QImage("./data/basterds/keys/120.png"));
 	std::shared_ptr<QImage> mask(new QImage(*m_frames.at(beg)));
 	std::shared_ptr<QImage> frame1(new QImage(*m_frames.at(beg)));
+
+//    std::cout << key->height() << " " << key->width() << std::endl;
+
 
 	// get initial GEdge guide
 	GEdge edge(frame1);
 	prevEdge = edge.getGuide(beg);
+
 
 	// filler mask for advection
 	mask->fill(Qt::white);
@@ -239,14 +266,18 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 	// get initial GPos guide
 	QString prevPos = gpos_cur.getGuide(beg);
 
+
 	Mat i1, i2;
 
 	// use keyframe as initial previously stylized frame
 	int keyNum =  m_io.getKeyframeNum(keyIdx);
 	QString keynum = QString::number(keyNum).rightJustified(3, '0');
-	QString prevTemp("./data/test/keys/" + keynum + ".jpg");
+    QString prevTemp("./data/basterds/keys/" + keynum + ".png");
 	std::shared_ptr<QImage> prevStylizedFrame(new QImage(*key));
 	GTemp gtemp;
+
+//    std::cout << prevStylizedFrame->height() << " " << prevStylizedFrame->width() << std::endl;
+
 
 	// going either forwards or backwards depending on keyframe
 	for (int i = beg+step; i != end; i+=step){
@@ -261,7 +292,9 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 		cvtColor(i1, i1, COLOR_BGRA2BGR);
 		cvtColor(i2, i2, COLOR_BGRA2BGR);
 
+
 		Mat2f out = calculateFlow(i1, i2, false, false);
+        cv::patchNaNs(out, 0);
 
 		// if running through whole pipeline, store advection field
 		if (step > 0){
@@ -271,8 +304,11 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 		// get GPos and GTemp guides
 		gpos_cur.advect(mask, out);
 		QString g_pos2 = gpos_cur.getGuide(i);
+//        std::cout << "hit e" << std::endl;
+//        std::cout << prevStylizedFrame->height() << " " << prevStylizedFrame->width() << std::endl;
 
 		gtemp.updateGuide(prevStylizedFrame, out, mask);
+//        std::cout << "updating guide: " << i << std::endl;
 		QString g_temp2 = gtemp.getGuide(i);
 
 		// get 3-digit frame number
@@ -281,18 +317,18 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 
 		// build command to call ebsynth
 
-		QString command("cd ./deps/ebsynth && bin/ebsynth -style ../../data/test/keys/" + keynum + ".jpg ");
+        QString command("cd ./deps/ebsynth && bin/ebsynth -style ../../data/basterds/keys/" + keynum + ".png ");
 		command.append("-guide ../." + prevEdge + " ../." + g_edge2 + " -weight 0.5 ");
 
 		//        command.append("-guide " + g_mask1 + " " + g_mask2 + " -weight 6 ");
 
-		command.append("-guide ../../data/test/video/" + prevframe + ".jpg " + "../../data/test/video/" + frame + ".jpg -weight 6 ");
+        command.append("-guide ../../data/basterds/video/" + prevframe + ".png " + "../../data/basterds/video/" + frame + ".png -weight 6 ");
 
 		command.append("-guide ../." + prevPos + " ../." + g_pos2 + " -weight 2 ");
 
 		command.append("-guide ../." + prevTemp + " ../." + g_temp2 + " -weight 0.5 ");
 
-		QString prefix("outtest/" + QString::number(keyIdx) + "-" + frame );
+        QString prefix("data/basterds/outtest/" + QString::number(keyIdx) + "-" + frame );
 
 		QString outfile(prefix+".png");
 		command.append("-output ../../" + outfile);
@@ -303,7 +339,7 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 		const char *c_str = ba.data();
 
 		// actually calls ebsynth executable
-		std::system(c_str);
+        std::system(c_str);
 
 		prevStylizedFrame = std::make_shared<QImage>(outfile);
 

@@ -17,15 +17,28 @@ void Advector::advect(const cv::Mat2f& flowField, std::shared_ptr<QImage> mask,
     int imgH = outFrame->height();
     int imgW = outFrame->width();
 
+    QRgb *scanline = (QRgb*)outFrame->scanLine(0);
+//    std::cout << mask->height() << std::endl;
+//    std::cout << mask->width() << std::endl;
+//    std::cout << inFrame->height() << std::endl;
+//    std::cout << inFrame->width() << std::endl;
+
     for (int r = 0; r < imgH; ++r) {
         for (int c = 0; c < imgW; ++c) {
             cv::Vec2f u = flowField.at<cv::Vec2f>(r, c);
-
+//            std::cout << "u0: " << u[0] << " u1: " << u[1] << std::endl;
             cv::Vec2f prevPos = cv::Vec2f({static_cast<float>(c), static_cast<float>(r)}) - u;
+//            std::cout << "prevPos0: " << prevPos[0] << " prevPos1: " << prevPos[1] << std::endl;
 
+//            std::cout << "rip" << std::endl;
             QColor interpColor = bilinearInterpolate(inFrame, mask, prevPos);
-            outFrame->setPixelColor(c, r, interpColor);
+//            outFrame->setPixel(c, r, interpColor.rgb());
+//            std::cout << "b" << std::endl;
+            scanline[r*imgW + c] = interpColor.rgb();
         }
+//        if (r == 1){
+//            break;
+//        }
     }
 }
 
@@ -56,7 +69,6 @@ float Advector::bilinearInterpolateMask(cv::Mat& img, cv::Vec2f pos)
 {
     float x = pos[0];
     float y = pos[1];
-
     // If x or y is exactly an integer coordinate, move it a negligible
     // amount to avoid NaNs in interpolation equation
     if (x == std::floor(x)) x += 1e-4;
@@ -113,6 +125,7 @@ QColor Advector::bilinearInterpolate(std::shared_ptr<QImage> img,
 {
     float x = pos[0];
     float y = pos[1];
+//    std::cout << "x: " << x << " y: " << y << std::endl;
 
     // If x or y is exactly an integer coordinate, move it a negligible
     // amount to avoid NaNs in interpolation equation

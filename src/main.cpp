@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
     Stylizer style(inputFrames, keyframes, ioHandler);
 //    style.generateGuides();
-    style.run();
+    style.runSingle();
     a.exit();
 
 

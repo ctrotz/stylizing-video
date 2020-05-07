@@ -39,6 +39,7 @@ void GTemp::updateGuide(std::shared_ptr<QImage> prevStylizedFrame,
                         std::shared_ptr<QImage> mask)
 {
     std::shared_ptr<QImage> newFrame(new QImage(*prevStylizedFrame));
+//    std::cout << newFrame->height() << " " << newFrame->width() << std::endl;
     m_advector.advect(motionField, mask, prevStylizedFrame, newFrame);
     m_guide = newFrame;
 }
