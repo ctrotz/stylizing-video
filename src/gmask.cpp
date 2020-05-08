@@ -40,7 +40,7 @@ void GMask::setMask(std::shared_ptr<QImage> mask){
 void GMask::createMask(std::shared_ptr<QImage> currFrame, int i){
 
     // Detect edges
-    Mat mat = qimage_to_mat_ref(currFrame);
+    Mat mat = qimage_to_mat_ref(*currFrame);
 
     // First, blur
     Mat blurMat(mat.size(), CV_8UC3);

@@ -29,7 +29,8 @@ SOURCES += src/main.cpp \
     src/iohandler.cpp \
     src/RGBA.cpp \
     src/opencvutils.cpp \
-    src/advector.cpp
+    src/advector.cpp \
+    src/styletransfer.cpp
 
 HEADERS += src/guide.h \
     src/gedge.h \
@@ -41,11 +42,11 @@ HEADERS += src/guide.h \
     src/RGBA.h \
     src/optical-flow/simpleflow.h \
     src/opencvutils.h \
-    src/advector.h
+    src/advector.h \
+    src/styletransfer.h \
 
 INCLUDEPATH += lib/
 macx {
-
     INCLUDEPATH += /usr/local/include/opencv4
     LIBS += -L/usr/local/lib/\
      -lopencv_calib3d.4.3.0\
@@ -62,7 +63,7 @@ macx {
      -lopencv_video.4.3.0\
      -lopencv_videostab.4.3.0\
      -lopencv_imgcodecs.4.3.0\
-     -lopencv_optflow.4.3.0
+     -lopencv_optflow.4.3.0\
 
     DEPENDPATH += /usr/local/include/opencv4
 }

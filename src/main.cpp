@@ -10,6 +10,7 @@
 //#include "gmask.h"
 
 #include "iohandler.h"
+#include "styletransfer.h"
 
 //#include "gedge.h"
 //#include "optical-flow/simpleflow.h"
@@ -67,6 +68,8 @@ int main(int argc, char *argv[])
     vector<std::shared_ptr<QImage>> advectedFrames;
 
     ioHandler.loadInputData(inputFrames, keyframes);
+
+    styleTransfer("./styletranfer/000.jpg","./stylizer/bust.jpg");
 
 //    std::shared_ptr<QImage> currFrame(new QImage("./data/minitest/video/000.jpg"));
 
