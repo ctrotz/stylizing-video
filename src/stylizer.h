@@ -14,20 +14,24 @@ class Stylizer {
 public:
     Stylizer(std::vector<std::shared_ptr<QImage>> inputFrames, std::vector<std::shared_ptr<QImage>> keyFrames, IOHandler &io);
     virtual ~Stylizer();
-    std::vector<QString> generateGuides(std::shared_ptr<QImage> key, int keyIdx, int beg, int end, int step);
+    std::pair<std::vector<QString>, std::vector<QString>> generateGuides(std::shared_ptr<QImage> key, int keyIdx, int beg, int end, int step);
+    std::pair<std::vector<QString>, std::vector<QString>> fetchGuides(int keyIdx, int beg, int end, int step);
     void run();
+    std::vector<cv::Mat> createMasks(std::pair<std::vector<QString>, std::vector<QString>> a, std::pair<std::vector<QString>, std::vector<QString>> b);
 private:
-//    void generateGuides(std::shared_ptr<QImage> keyFrame, std::shared_ptr<QImage> prevFrame, std::shared_ptr<QImage> currFrame);
     std::vector<std::shared_ptr<QImage>> m_frames;
     std::vector<std::shared_ptr<QImage>> m_keys;
     std::vector<std::shared_ptr<QImage>> m_output;
+    std::vector<cv::Mat2f> m_advects;
+    std::vector<std::string> m_flowpaths;
 
     IOHandler m_io;
 
-//    std::shared_ptr<QImage> g_edge;
-//    std::shared_ptr<QImage> g_mask;
-//    std::shared_ptr<QImage> g_pos;
-//    std::shared_ptr<QImage> g_temp;
+    std::vector<float> loadError(QString &binary);
+    std::vector<cv::Mat> tempCoherence(std::vector<cv::Mat> masks);
+
+    void poissonBlend(std::vector<cv::Mat> &hp_blends, const std::vector<cv::Mat3f> &gradX, const std::vector<cv::Mat3f> &gradY, std::vector<cv::Mat> &out_frames); 
+
 };
 
 

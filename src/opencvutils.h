@@ -9,4 +9,6 @@ using namespace cv;
 cv::Mat qimage_to_mat_ref(QImage &image);
 QImage mat_to_qimage_ref(cv::Mat &mat, QImage::Format format);
 String type2str(int type);
+void serializeMatbin(cv::Mat& mat, std::string filename);
+cv::Mat deserializeMatbin(std::string filename);
 #endif // OPENCVUTILS_H
