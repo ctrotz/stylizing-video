@@ -3,8 +3,16 @@
 ### Requirements
 * Qt 5.2.0 or higher
 * [OpenCV 4.3.0](https://github.com/opencv/opencv/tree/4.3.0) + [opencv_contrib](https://github.com/opencv/opencv_contrib)
+* [FFTW 3.3.8 (or higher)](http://www.fftw.org/)
+* Mac: macOS 10.15 or higher, Xcode 11 with Command Line Tools
 
 ### Mac Installation
+Clone our repository and run
+```
+git submodule update --init --recursive
+```
+to set up our EbSynth submodule. 
+#### OpenCV
 Install both OpenCV 4.3.0 and opencv_contrib from source, making sure to link them at build time by passing in
 ```
 cmake -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules <opencv_source_directory>
@@ -21,6 +29,12 @@ make -j4
 make install
 ```
 4. All set!
+#### Other dependencies
+Install FFTW using
+``` 
+brew install fftw
+```
+Next, `cd` to `deps/ebsynth` and run the appropriate build script (`./build-macos-cpu-only.sh`). 
 
 ## Implementation
 ### Guide Generation
