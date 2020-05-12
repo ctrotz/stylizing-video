@@ -7,11 +7,7 @@
 * Mac: macOS 10.15 or higher, Xcode 11 with Command Line Tools
 
 ### Mac Installation
-Clone our repository and run
-```
-git submodule update --init --recursive
-```
-to set up our EbSynth submodule. 
+Clone our repository and run `git submodule update --init --recursive` to set up our EbSynth submodule. 
 #### OpenCV
 Install both OpenCV 4.3.0 and opencv_contrib from source, making sure to link them at build time by passing in
 ```
@@ -30,11 +26,7 @@ make install
 ```
 4. All set!
 #### Other dependencies
-Install FFTW using
-``` 
-brew install fftw
-```
-Next, `cd` to `deps/ebsynth` and run the appropriate build script (`./build-macos-cpu-only.sh`). 
+Install FFTW using `brew install fftw` Next, `cd` to `deps/ebsynth` and run the appropriate build script (`./build-macos-cpu-only.sh`). 
 
 ## Implementation
 ### Guide Generation
