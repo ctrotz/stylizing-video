@@ -39,7 +39,7 @@ void Stylizer::run(){
     Sequence cur;
     for (uint i = 0; i < m_seqs.size(); i++) {
         cur = m_seqs.at(i);
-	generateGuides(m_keys.at(cur.keyframeIdx), cur);
+        generateGuides(m_keys.at(cur.keyframeIdx), cur);
     }
     if (m_keys.size() == 1) {
         return;
@@ -202,6 +202,7 @@ void Stylizer::generateGuides(shared_ptr<QImage> keyframe, Sequence& s) {
     fs::path color_initial = fs::absolute(m_io.getInputPath(s, s.begFrame));
 
 	// going either forwards or backwards depending on keyframe
+    Ptr<DenseOpticalFlow> deepflow = cv::optflow::createOptFlow_DeepFlow();
     for (int i = s.begFrame+s.step; i != s.endFrame; i+=s.step){
         std::shared_ptr<QImage> cur_frame(new QImage(*m_frames.at(i)));
 
@@ -211,10 +212,12 @@ void Stylizer::generateGuides(shared_ptr<QImage> keyframe, Sequence& s) {
         i1 = qimage_to_mat_ref((*m_frames.at(i-s.step)));
 		i2 = qimage_to_mat_ref((*m_frames.at(i)));
 
-		cvtColor(i1, i1, COLOR_BGRA2BGR);
-		cvtColor(i2, i2, COLOR_BGRA2BGR);
+                cvtColor(i1, i1, COLOR_BGRA2GRAY);
+                cvtColor(i2, i2, COLOR_BGRA2GRAY);
 
-		Mat2f out = calculateFlow(i1, i2, false, false);
+                Mat2f out;
+                deepflow->calc(i1, i2, out);//calculateFlow(i1, i2, false, false);
+                cv::patchNaNs(out, 0);
 
 		// if running through whole pipeline, store advection field
         if (s.step > 0) {

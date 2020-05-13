@@ -15,10 +15,9 @@ void GradientBlender::blend(Sequence& a, Sequence& b, const std::vector<cv::Mat>
 {
     for (uint i = 0; i <= a.size; i++) {
 		// Read in imgs
-        cv::Mat Oai = imread(IOHandler::getOutputPath(a, i), cv::IMREAD_COLOR);
-        cv::Mat Obi = imread(IOHandler::getOutputPath(b, i), cv::IMREAD_COLOR);
-		
-        assert(Oai.channels() == 3 && Obi.channels() == 3);
+        cv::Mat Oai = imread(IOHandler::getOutputPath(a, i+a.begFrame), cv::IMREAD_COLOR);
+        cv::Mat Obi = imread(IOHandler::getOutputPath(b, i+a.begFrame), cv::IMREAD_COLOR);
+
 		cv::Mat3f gradXA, gradYA, gradXB, gradYB;
 		generateGradient(Oai, gradXA, gradYA);	
 		generateGradient(Obi, gradXB, gradYB);
