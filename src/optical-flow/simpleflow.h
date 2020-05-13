@@ -12,7 +12,6 @@
 using namespace cv;
 Mat calculateFlow(const Mat& i1, const Mat& i2, bool retColor = false,  bool imshowFlag = false) {
 
-    namedWindow("flow");
     Mat flow;
 
     if (i1.empty()) {

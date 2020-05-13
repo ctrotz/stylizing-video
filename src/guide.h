@@ -3,7 +3,7 @@
 
 #include <Eigen/Dense>
 #include <QObject>
-
+#include <memory>
 class Guide
 {
 public:
