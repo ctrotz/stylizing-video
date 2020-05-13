@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-content_image_path = ARG_0
-style_image_path = ARG_1
+content_image_path = sys.arg[1]
+style_image_path = sys.arg[2]
+output_image_path = sys.arg[3]
 
 # Load content and style images (see example in the attached colab).
 content_image = plt.imread(content_image_path)
@@ -25,4 +26,4 @@ hub_module = hub.load('https://tfhub.dev/google/magenta/arbitrary-image-stylizat
 outputs = hub_module(tf.constant(content_image), tf.constant(style_image))
 stylized_image = outputs[0]
 
-plt.imsave("./output.jpg",np.array(stylized_image[0]))
+plt.imsave(output_image_path,np.array(stylized_image[0]))

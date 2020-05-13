@@ -30,7 +30,6 @@ SOURCES += src/main.cpp \
     src/RGBA.cpp \
     src/opencvutils.cpp \
     src/advector.cpp \
-    src/styletransfer.cpp \
     src/fft_fsolver.cpp \
     src/histogramblend.cpp \
     src/gradientblend.cpp
@@ -46,7 +45,6 @@ HEADERS += src/guide.h \
     src/optical-flow/simpleflow.h \
     src/opencvutils.h \
     src/advector.h \
-    src/styletransfer.h \
     src/fft_fsolver.h \
     src/histogramblend.h \
     src/gradientblend.h
