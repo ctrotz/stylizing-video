@@ -52,7 +52,11 @@ HEADERS += src/guide.h \
 INCLUDEPATH += lib/
 INCLUDEPATH += deps/ebsynth/include
 macx {
-    INCLUDEPATH += /usr/local/include \
+   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
+    QMAKE_CXXFLAGS += -mmacosx-version-min=10.15
+
+
+   INCLUDEPATH += /usr/local/include \
      /usr/local/include/opencv4\
     /usr/local/opt/libffi/include
 
@@ -76,7 +80,7 @@ macx {
      -lfftw3f\
      -lfftw3f_threads\
     -L/usr/local/opt/libffi/lib
-
+	
     DEPENDPATH += /usr/local/include/opencv4\
     /usr/local/include
 }
