@@ -4,14 +4,14 @@
 #include <Eigen/Dense>
 #include <QImage>
 #include <opencv2/core/mat.hpp>
+#include "iohandler.h"
 
 class HistogramBlender
 {
 public:
     HistogramBlender();
 
-    void blend(const std::vector<QString> &seqA,
-               const std::vector<QString> &seqB,
+    void blend(Sequence& a, Sequence& b,
                const std::vector<cv::Mat> &errMask,
                std::vector<cv::Mat> &outBlend);
 

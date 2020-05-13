@@ -42,6 +42,11 @@ QString GPos::getGuide(int i){
     return filename;
 }
 
+std::string GPos::getType()
+{
+    return "pos";
+}
+
 void GPos::advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField) {
     Advector advector = Advector();
     std::shared_ptr<QImage> advected = std::make_shared<QImage>(m_guide->width(), m_guide->height(), m_guide->format());

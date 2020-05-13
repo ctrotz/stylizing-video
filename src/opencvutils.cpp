@@ -24,7 +24,7 @@ cv::Mat qimage_to_mat_ref(QImage &image)
 
 QImage mat_to_qimage_ref(cv::Mat &mat, QImage::Format format)
 {
-	return QImage(mat.data, mat.cols, mat.rows, mat.step1(), format);
+    return QImage(mat.data, mat.cols, mat.rows, mat.step, format);
 }
 
 String type2str(int type) {

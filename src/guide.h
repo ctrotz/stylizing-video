@@ -10,10 +10,9 @@ public:
     Guide();
     Guide(std::shared_ptr<QImage> currFrame);
 
+    virtual std::shared_ptr<QImage> getGuide() = 0;
     virtual ~Guide();
-
-//protected:
-//    virtual QString getGuide() = 0;
+    virtual std::string getType() = 0;
 };
 
 #endif // GUIDE_H

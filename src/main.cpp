@@ -35,6 +35,8 @@ int main(int argc, char *argv[])
     parser.addPositionalArgument("begFrame", "Optional first frame in sequence");
     parser.addPositionalArgument("endFrame", "Optional last frame in sequence");
 
+    QCommandLineOption binary("binary", "Specifies alternate EbSynth location.", "location", "deps/ebsynth/bin/ebsynth");
+    parser.addOption(binary);
     parser.process(a);
 //    std::system("cd deps/ebsynth");
 
@@ -56,6 +58,8 @@ int main(int argc, char *argv[])
         begFrame = args[3].toInt();
         endFrame = args[4].toInt();
     }
+   QString binaryLoc = parser.value(binary);
+
 
     // Check arguments' validity
     if (begFrame > endFrame) {
@@ -64,7 +68,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    IOHandler ioHandler(begFrame, endFrame, inputDir, keyframeDir, outputDir);
+    IOHandler ioHandler(begFrame, endFrame, inputDir.toStdString(), keyframeDir.toStdString(), outputDir.toStdString(), binaryLoc.toStdString());
 
     vector<std::shared_ptr<QImage>> inputFrames;
     vector<std::shared_ptr<QImage>> keyframes;
