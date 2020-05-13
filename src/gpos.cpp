@@ -1,7 +1,9 @@
 #include "advector.h"
 #include "gpos.h"
+#include "gradientblend.h"
 #include "opencvutils.h"
 #include "opencv2/photo.hpp"
+#include "fft_fsolver.h"
 
 #include <QLinearGradient>
 #include <QPainter>
@@ -52,12 +54,22 @@ void GPos::advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField) {
     std::shared_ptr<QImage> advected = std::make_shared<QImage>(m_guide->width(), m_guide->height(), m_guide->format());
     advected->fill(Qt::white);
     advector.advect(flowField, g_mask, m_guide, advected);
-    m_guide = advected;
+    cv::Mat gpos = qimage_to_mat_ref(*advected);
+    cv::Mat gray;
+    cv::cvtColor(gpos, gpos, cv::COLOR_BGRA2BGR);
 
-//    cv::imshow("gpos", qimage_to_mat_ref((*m_guide)));
-//    std::cout << "window open" << std::endl;
-//    cv::waitKey(0);
-//    std::cout << "window close" << std::endl;
+    std::vector<cv::Mat> bgrChannels(3);
+    cv::split(gpos, bgrChannels);
+
+    gray = bgrChannels.at(1) + bgrChannels.at(2);
+    gray *= 0.5;
+
+    cv::Mat mask;
+    cv::threshold(gray, mask, 120, 255, cv::THRESH_BINARY_INV);
+
+    cv::inpaint(gpos, mask, gpos, 30, cv::INPAINT_NS);
+    cv::cvtColor(gpos, gpos, cv::COLOR_BGR2BGRA);
+    m_guide = std::make_shared<QImage>(mat_to_qimage_ref(gpos, m_guide->format()).copy());
 
     m_mask = g_mask;
 }
