@@ -203,7 +203,7 @@ void Stylizer::generateGuides(shared_ptr<QImage> keyframe, Sequence& s) {
 
 	// going either forwards or backwards depending on keyframe
     Ptr<DenseOpticalFlow> deepflow = cv::optflow::createOptFlow_DeepFlow();
-    for (int i = s.begFrame+s.step; i != s.endFrame; i+=s.step){
+    for (int i = s.begFrame+s.step; i != s.endFrame+s.step; i+=s.step){
         std::shared_ptr<QImage> cur_frame(new QImage(*m_frames.at(i)));
 
         edge.updateFrame(cur_frame);
