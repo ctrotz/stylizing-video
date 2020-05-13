@@ -1,7 +1,4 @@
 
-<<<<<<< HEAD
-=======
 [submodule "deps/ebsynth"]
 	path = deps/ebsynth
 	url = https://github.com/ctrotz/ebsynth.git
->>>>>>> ca532fa185ceabf65b254383056c5e7a37362e0b
