@@ -9,7 +9,6 @@
 #include "stylizer.h"
 
 #include "iohandler.h"
-#include "styletransfer.h"
 
 //#include "gedge.h"
 //#include "optical-flow/simpleflow.h"
@@ -77,7 +76,7 @@ int main(int argc, char *argv[])
 
     ioHandler.loadInputData(inputFrames, keyframes);
 
-    styleTransfer("./styletranfer/000.jpg","./stylizer/bust.jpg");
+    GMask g_mask = GMask(inputFrames[10]);
 
 //    std::shared_ptr<QImage> currFrame(new QImage("./data/minitest/video/000.jpg"));
 

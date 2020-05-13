@@ -116,4 +116,6 @@ void GMask::createMask(std::shared_ptr<QImage> currFrame, int i){
     mask.convertTo(mask,CV_8UC1,1);
     QImage imgIn = QImage(mask.data, mask.cols, mask.rows, static_cast<int>(mask.step), QImage::Format_Grayscale8);
     m_mask = make_shared<QImage>(imgIn);
+
+    imgIn.save("./imgIn.jpg");
 }
