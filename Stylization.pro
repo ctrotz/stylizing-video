@@ -1,9 +1,8 @@
-QT += gui
+QT += gui widgets
 QT += xml
 
 CONFIG += c++1z console
 CONFIG -= app_bundle
-
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -51,12 +50,39 @@ HEADERS += src/guide.h \
 
 INCLUDEPATH += lib/
 INCLUDEPATH += deps/ebsynth/include
+unix:!macx {
+
+    INCLUDEPATH += /usr/local/include \
+     /usr/local/include/opencv4\
+
+    LIBS += -L/usr/local/lib/\
+     -lopencv_calib3d\
+     -lopencv_core\
+     -lopencv_features2d \
+     -lopencv_flann\
+     -lopencv_highgui\
+     -lopencv_imgproc\
+     -lopencv_ml\
+     -lopencv_objdetect\
+     -lopencv_photo\
+     -lopencv_stitching\
+     -lopencv_superres\
+     -lopencv_video\
+     -lopencv_videostab\
+     -lopencv_imgcodecs\
+     -lopencv_optflow\
+     -lfftw3\
+     -lfftw3f\
+     -lfftw3f_threads\
+
+    DEPENDPATH += /usr/local/include/opencv4\
+    /usr/local/include
+
+}
+
+
 macx {
-   QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
-    QMAKE_CXXFLAGS += -mmacosx-version-min=10.15
-
-
-   INCLUDEPATH += /usr/local/include \
+    INCLUDEPATH += /usr/local/include \
      /usr/local/include/opencv4\
     /usr/local/opt/libffi/include
 
@@ -76,11 +102,11 @@ macx {
      -lopencv_videostab.4.3.0\
      -lopencv_imgcodecs.4.3.0\
      -lopencv_optflow.4.3.0\
-     -lfftw3.3\
+     -lfftw3\
      -lfftw3f\
      -lfftw3f_threads\
     -L/usr/local/opt/libffi/lib
-	
+
     DEPENDPATH += /usr/local/include/opencv4\
     /usr/local/include
 }

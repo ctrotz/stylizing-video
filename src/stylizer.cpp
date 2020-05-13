@@ -18,13 +18,11 @@ using namespace std;
 Stylizer::Stylizer(std::vector<shared_ptr<QImage>> inputFrames, std::vector<shared_ptr<QImage>> keyFrames, IOHandler &io) :
 	m_frames(inputFrames), m_keys(keyFrames), m_io(io)
 {
-	m_advects.reserve(m_frames.size());
 }
 
 Stylizer::~Stylizer(){
 	m_frames.clear();
 	m_keys.clear();
-	m_advects.clear();
 }
 
 void Stylizer::run(){
@@ -58,7 +56,7 @@ void Stylizer::run(){
         assert(a.step != b.step && a.begFrame == b.endFrame && a.endFrame == b.begFrame);
         copyKeyframes(a, b);
 		std::vector<cv::Mat> masks = createMasks(a, b);
-		std::vector<cv::Mat> final_masks = tempCoherence(masks);
+                std::vector<cv::Mat> final_masks = tempCoherence(masks, a.begFrame);
 
 		// histogram-preserving blend
 		std::vector<cv::Mat> outBlend;
@@ -102,7 +100,7 @@ void Stylizer::poissonBlend(std::vector<cv::Mat> &hp_blends, const std::vector<c
 	}
 }	
 
-std::vector<cv::Mat> Stylizer::tempCoherence(std::vector<cv::Mat> masks){
+std::vector<cv::Mat> Stylizer::tempCoherence(std::vector<cv::Mat> masks, int begFrame){
 	std::vector<cv::Mat> final_masks;
 	final_masks.reserve(masks.size());
 	int width = masks[0].cols;
@@ -118,12 +116,8 @@ std::vector<cv::Mat> Stylizer::tempCoherence(std::vector<cv::Mat> masks){
 	for (uint i=1; i < masks.size()-1; i++){
 		Mat currMask = masks[i];
 		// load advection field from binary or fetch from stored vector
-		Mat2f flowField;
-		if (GENERATE) {
-			flowField = m_advects[i-1];
-		} else {
-                        flowField = deserializeMatbin(m_io.getFlowPath(i));
-		}
+                Mat2f flowField;
+                flowField = deserializeMatbin(m_io.getFlowPath(i + begFrame));
 		Mat advected(size, CV_8UC1);
 		advector.advectMask(flowField, prevMask, advected);
 
@@ -225,9 +219,7 @@ void Stylizer::generateGuides(shared_ptr<QImage> keyframe, Sequence& s) {
 		// if running through whole pipeline, store advection field
         if (s.step > 0) {
             serializeMatbin(out, m_io.getFlowPath(i));
-
-			m_advects.push_back(out);
-		}
+        }
 
 		// get GPos and GTemp guides
 		gpos_cur.advect(mask, out);

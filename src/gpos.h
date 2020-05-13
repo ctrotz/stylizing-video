@@ -4,7 +4,7 @@
 #include "guide.h"
 #include <QObject>
 #include <QImage>
-#include <opencv2/core.hpp>
+#include <opencv4/opencv2/core.hpp>
 
 #include <memory>
 
