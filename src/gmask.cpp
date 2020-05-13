@@ -24,12 +24,18 @@ GMask::~GMask(){
     m_mask = nullptr;
 }
 
-QString GMask::getGuide(){
-    return m_mask;
-}
-
 void GMask::updateFrame(std::shared_ptr<QImage> frame, int i) {
     createMask(frame, i);
+}
+
+string GMask::getType()
+{
+    return "mask";
+}
+
+std::shared_ptr<QImage> GMask::getGuide()
+{
+    return m_mask;
 }
 
 void GMask::setMask(std::shared_ptr<QImage> mask){
@@ -117,10 +123,5 @@ void GMask::createMask(std::shared_ptr<QImage> currFrame, int i){
     // Make sure mask is 1 channel
     mask.convertTo(mask,CV_8UC1,1);
     QImage imgIn = QImage(mask.data, mask.cols, mask.rows, static_cast<int>(mask.step), QImage::Format_Grayscale8);
-    QString filename("./guides/mask");
-    filename.append(QString::number(i));
-    filename.append(".png");
-    imgIn.save(filename, nullptr, 100);
-//    m_mask = make_shared<QImage>(imgIn);
-    m_mask = filename;
+    m_mask = make_shared<QImage>(imgIn);
 }

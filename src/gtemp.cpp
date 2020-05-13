@@ -19,6 +19,16 @@ GTemp::GTemp(std::shared_ptr<QImage> prevStylizedFrame,
     updateGuide(prevStylizedFrame, motionField, mask);
 }
 
+std::string GTemp::getType()
+{
+    return "temp";
+}
+
+std::shared_ptr<QImage> GTemp::getGuide()
+{
+    return std::make_shared<QImage>(m_guide->convertToFormat(QImage::Format_RGBX8888));
+}
+
 GTemp::~GTemp()
 {
     m_guide = nullptr;

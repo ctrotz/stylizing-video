@@ -37,8 +37,18 @@ QString GEdge::getGuide(int i){
     return filename;
 }
 
+std::shared_ptr<QImage> GEdge::getGuide()
+{
+    return m_guide;
+}
+
 void GEdge::updateFrame(std::shared_ptr<QImage> currFrame) {
     createEdge(currFrame);
+}
+
+std::string GEdge::getType()
+{
+    return "edge";
 }
 
 RGBA* GEdge::getData(std::shared_ptr<QImage> image){

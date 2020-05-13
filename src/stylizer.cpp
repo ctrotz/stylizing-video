@@ -9,6 +9,8 @@
 #include "gradientblend.h"
 #include "fft_fsolver.h"
 #include <iostream>
+#include <QDebug>
+#include <QFileInfo>
 #define GENERATE false
 
 using namespace std;
@@ -28,81 +30,73 @@ Stylizer::~Stylizer(){
 void Stylizer::run(){
 	HistogramBlender hb;
 	GradientBlender gb;
-
-	for (uint i = 0; i < m_keys.size()-1; i++){
-		// store key paths to pass into histogram blender
-		int keyNum_a =  m_io.getKeyframeNum(i);
-		QString keynum_a = QString::number(keyNum_a).rightJustified(3, '0');
-		QString key_a("./data/test/keys/" + keynum_a + ".jpg");
-		int keyNum_b =  m_io.getKeyframeNum(i+1);
-		QString keynum_b = QString::number(keyNum_b).rightJustified(3, '0');
-		QString key_b("./data/test/keys/" + keynum_b + ".jpg");
-
-		int beg = m_io.getKeyframeNum(i);
-		int end = m_io.getKeyframeNum(i+1);
-
-		// treat beg/end as indices for input frames
-		std::pair<std::vector<QString>, std::vector<QString>> a;
-		std::pair<std::vector<QString>, std::vector<QString>> b;
-
-		// Only run generateGuides if you don't have the stylized frames saved to file!
-		if (GENERATE){
-			a = generateGuides(m_keys.at(i), i, beg, end, 1);
-			b = generateGuides(m_keys.at(i+1), i+1, end, beg, -1);
-		} else {
-			a = fetchGuides(i, beg, end, 1);
-			b = fetchGuides(i+1, end, beg, -1);
-		}
-
-		// Files were pushed onto b in reverse order
-		std::reverse(b.first.begin(), b.first.end());
-		std::reverse(b.second.begin(), b.second.end());
-
-		// blend a and b
+    std::vector<shared_ptr<QImage>> output;
+    std::vector<fs::path> outfiles;
+    // Load in all Sequences, generate them, and then blend
+    std::vector<Sequence> seqs;
+    for (uint i = 0; i < m_keys.size(); i++){
+        seqs = m_io.getSequences(i);
+        m_seqs.insert(m_seqs.end(), seqs.begin(), seqs.end());
+    }
+    Sequence cur;
+    for (uint i = 0; i < m_seqs.size(); i++) {
+        cur = m_seqs.at(i);
+        //generateGuides(m_keys.at(cur.keyframeIdx), cur);
+    }
+    if (m_keys.size() == 1) {
+        return;
+    }
+    int i = 0;
+    Sequence a, b;
+    while (i < m_seqs.size()) {
+        if ((i < m_seqs.size() - 1 && m_seqs.at(i).step == m_seqs.at(i + 1).step) || i == m_seqs.size() - 1) {
+            i++;
+            continue;
+        }
+        a = m_seqs.at(i);
+        b = m_seqs.at(i + 1);
+        assert(a.step != b.step && a.begFrame == b.endFrame && a.endFrame == b.begFrame);
+        copyKeyframes(a, b);
 		std::vector<cv::Mat> masks = createMasks(a, b);
 		std::vector<cv::Mat> final_masks = tempCoherence(masks);
-
-		// add keys to beg/end of stylized frames
-		a.first.insert(a.first.begin(), key_a);
-		a.first.push_back(key_b);
-		b.first.insert(b.first.begin(), key_a);
-		b.first.push_back(key_b);
 
 		// histogram-preserving blend
 		std::vector<cv::Mat> outBlend;
 		outBlend.reserve(final_masks.size());
-		hb.blend(a.first, b.first, final_masks, outBlend);
+        hb.blend(a, b, final_masks, outBlend);
 
 		// mask-based gradient blending
 		std::vector<cv::Mat3f> gradBlendX, gradBlendY;
 		gradBlendX.reserve(final_masks.size());
 		gradBlendY.reserve(final_masks.size());
-		gb.blend(a.first, b.first, final_masks, gradBlendX, gradBlendY);
+        gb.blend(a, b, final_masks, gradBlendX, gradBlendY);
 
 		// poisson blend
 		std::vector<cv::Mat> final_blends;
 		final_blends.reserve(final_masks.size());
 		poissonBlend(outBlend, gradBlendX, gradBlendY, final_blends);
-
-		std::vector<shared_ptr<QImage>> output;
-		output.reserve(final_masks.size());
 		QImage out;
 		for (uint i = 0; i < final_masks.size(); ++i) {
 			cv::cvtColor(final_blends.at(i), final_blends.at(i), cv::COLOR_BGR2RGB);
-			out = mat_to_qimage_ref(final_blends.at(i), QImage::Format::Format_RGB888);
+            out = mat_to_qimage_ref(final_blends.at(i), QImage::Format::Format_RGB888).copy();
 			output.push_back(std::make_shared<QImage>(out));
-		}	
-		m_io.exportAllFrames(output);
-
-	}
+            outfiles.push_back(fs::path(QString::number(i + a.begFrame).rightJustified(a.numDigits, '0').toStdString()));
+        }
+        i+=2;
+    }
+    m_io.exportImages(output, a.outputDir.parent_path(), outfiles);
 }
+
+void Stylizer::copyKeyframes(Sequence& a, Sequence& b) {
+    m_io.exportImages(std::vector<std::shared_ptr<QImage>>({m_keys.at(a.keyframeIdx)}), b.outputDir, std::vector<fs::path>({a.keyframePath.filename()}));
+    m_io.exportImages(std::vector<std::shared_ptr<QImage>>({m_keys.at(b.keyframeIdx)}), a.outputDir, std::vector<fs::path>({b.keyframePath.filename()}));
+}
+
 
 void Stylizer::poissonBlend(std::vector<cv::Mat> &hp_blends, const std::vector<cv::Mat3f> &gradX, const std::vector<cv::Mat3f> &gradY, std::vector<cv::Mat> &final_blends) {
 	cv::Mat3b currentFrame;
 	for (uint i = 0; i < hp_blends.size(); ++i) {
 		currentFrame = static_cast<cv::Mat3b>(hp_blends.at(i));
-		//cv::imshow("pre-solve", currentFrame);
-		//cv::waitKey(0);
 		fourierSolve(currentFrame, gradX.at(i), gradY.at(i), 0.1);
 		final_blends.push_back(currentFrame);
 	}
@@ -128,7 +122,7 @@ std::vector<cv::Mat> Stylizer::tempCoherence(std::vector<cv::Mat> masks){
 		if (GENERATE) {
 			flowField = m_advects[i-1];
 		} else {
-			flowField = deserializeMatbin(m_flowpaths[i-1]);
+            flowField = deserializeMatbin(m_io.getFlowPath(i));
 		}
 		Mat advected(size, CV_8UC1);
 		advector.advectMask(flowField, prevMask, advected);
@@ -150,51 +144,19 @@ std::vector<cv::Mat> Stylizer::tempCoherence(std::vector<cv::Mat> masks){
 	return final_masks;
 }
 
-// Method used for when stylized frames are already stored on file
-std::pair<std::vector<QString>, std::vector<QString>> Stylizer::fetchGuides(int keyIdx, int beg, int end, int step) {
-	std::vector<QString> outpaths;
-	outpaths.reserve(abs(end-beg) + 1);
-	std::vector<QString> errorpaths;
-	errorpaths.reserve(abs(end-beg) + 1);
-	// Don't delete the commented-out code here! This code will save the advection matrices as binary files, which
-	// you don't need if you have the ./flowfields/ folder downloaded locally.
-
-	//    Mat i1, i2;
-	for (int i = beg+step; i != end; i+=step){
-		if (step > 0){
-			//            i1 = qimage_to_mat_ref((*m_frames.at(i-step)));
-			//            i2 = qimage_to_mat_ref((*m_frames.at(i)));
-
-			//            cvtColor(i1, i1, COLOR_BGRA2BGR);
-			//            cvtColor(i2, i2, COLOR_BGRA2BGR);
-
-			//            Mat2f out = calculateFlow(i1, i2, false, false);
-			std::string filename = "flowfields/" + std::to_string(i) + ".matbin";
-			//            serializeMatbin(out, filename);
-			//            m_advects.push_back(out);
-			m_flowpaths.push_back(filename);
-		}
-		QString frame = QString::number(i).rightJustified(3, '0');
-		QString prefix("outtest/" + QString::number(keyIdx) + "-" + frame );
-		QString outfile(prefix+".png");
-		outpaths.push_back(outfile);
-		errorpaths.push_back(prefix + ".bin");
-	}
-	return {outpaths,errorpaths};
-}
-
-std::vector<cv::Mat> Stylizer::createMasks(std::pair<std::vector<QString>, std::vector<QString>> a, std::pair<std::vector<QString>, std::vector<QString>> b){
+std::vector<cv::Mat> Stylizer::createMasks(Sequence& a, Sequence &b){
+    assert(a.step == 1 && b.step == -1 && a.begFrame == b.endFrame && a.endFrame == b.begFrame);
 	std::vector<cv::Mat> masks;
 	int width = m_frames[0]->width();
 	int height = m_frames[0]->height();
 	cv::Size size(width, height);
-	masks.reserve(a.first.size()+2);
+    masks.reserve((a.endFrame - a.begFrame)+2);
 	masks.push_back(Mat::zeros(size, CV_8UC1));
 
 	// goes through all frames that are not keyframes
-	for (uint frame=0; frame < a.first.size(); frame++){
-		std::vector<float> error_a = loadError(a.second[frame]);
-		std::vector<float> error_b = loadError(b.second[frame]);
+    for (uint frame= a.begFrame+a.step; frame < a.endFrame; frame+= a.step){
+        std::vector<float> error_a = loadError(m_io.getErrorPath(a, frame));
+        std::vector<float> error_b =  loadError(m_io.getErrorPath(b, frame));
 		Mat mask(size, CV_8UC1);
 		uint8_t *maskData = mask.data;
 
@@ -210,55 +172,49 @@ std::vector<cv::Mat> Stylizer::createMasks(std::pair<std::vector<QString>, std::
 }
 
 // used to load in binary files containing error values for patchmatch
-std::vector<float> Stylizer::loadError(QString& binary) {
+std::vector<float> Stylizer::loadError(fs::path binary) {
 	std::vector<float> out;
-	std::ifstream in =  std::ifstream(binary.toStdString(), std::ifstream::binary);
+    std::ifstream in =  std::ifstream(binary, std::ifstream::binary);
 	deserialize(in, out);
 	return out;
 }
 
-std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int keyIdx, int beg, int end, int step) {
-	// paths for stylized frames
-	std::vector<QString> outpaths;
-	outpaths.reserve(abs(end-beg) + 1);
-	// paths for binary files containing patch errors
-	std::vector<QString> errorpaths;
-	errorpaths.reserve(abs(end-beg) + 1);
-
-	QString prevEdge;
-
+void Stylizer::generateGuides(shared_ptr<QImage> keyframe, Sequence& s) {
 	std::shared_ptr<QImage> key(new QImage(*keyframe));
-	std::shared_ptr<QImage> mask(new QImage(*m_frames.at(beg)));
-	std::shared_ptr<QImage> frame1(new QImage(*m_frames.at(beg)));
+    std::shared_ptr<QImage> mask(new QImage(*m_frames.at(s.begFrame)));
+    std::shared_ptr<QImage> frame1(new QImage(*m_frames.at(s.begFrame)));
 
 	// get initial GEdge guide
 	GEdge edge(frame1);
-	prevEdge = edge.getGuide(beg);
+    fs::path edge_initial = fs::absolute(m_io.exportGuide(s, s.begFrame, edge));
 
 	// filler mask for advection
 	mask->fill(Qt::white);
 	GPos gpos_start = GPos(mask);
+    fs::path pos_initial = fs::absolute(m_io.exportGuide(s, s.begFrame, gpos_start));
 	GPos gpos_cur = gpos_start;
-	// get initial GPos guide
-	QString prevPos = gpos_cur.getGuide(beg);
-
 	Mat i1, i2;
 
 	// use keyframe as initial previously stylized frame
-	int keyNum =  m_io.getKeyframeNum(keyIdx);
-	QString keynum = QString::number(keyNum).rightJustified(3, '0');
-	QString prevTemp("./data/test/keys/" + keynum + ".jpg");
-	std::shared_ptr<QImage> prevStylizedFrame(new QImage(*key));
+    fs::path temp_initial = fs::absolute(s.keyframePath);
+    std::shared_ptr<QImage> prevStylizedFrame(new QImage(*keyframe));
+
+    // export keyframe so we have it
+    m_io.exportImages(std::vector<std::shared_ptr<QImage>>({prevStylizedFrame}), s.outputDir, std::vector<fs::path>({s.keyframePath.filename()}));
+
 	GTemp gtemp;
 
+    // initial frame of video
+    fs::path color_initial = fs::absolute(m_io.getInputPath(s, s.begFrame));
+
 	// going either forwards or backwards depending on keyframe
-	for (int i = beg+step; i != end; i+=step){
-		std::shared_ptr<QImage> frame2(new QImage(*m_frames.at(i)));
+    for (int i = s.begFrame+s.step; i != s.endFrame; i+=s.step){
+        std::shared_ptr<QImage> cur_frame(new QImage(*m_frames.at(i)));
 
-		edge.updateFrame(frame2);
-		QString g_edge2 = edge.getGuide(i);
+        edge.updateFrame(cur_frame);
+        fs::path edge_cur = fs::absolute(m_io.exportGuide(s, i, edge));
 
-		i1 = qimage_to_mat_ref((*m_frames.at(i-step)));
+        i1 = qimage_to_mat_ref((*m_frames.at(i-s.step)));
 		i2 = qimage_to_mat_ref((*m_frames.at(i)));
 
 		cvtColor(i1, i1, COLOR_BGRA2BGR);
@@ -267,51 +223,45 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 		Mat2f out = calculateFlow(i1, i2, false, false);
 
 		// if running through whole pipeline, store advection field
-		if (step > 0){
+        if (s.step > 0) {
+            serializeMatbin(out, m_io.getFlowPath(i));
+
 			m_advects.push_back(out);
 		}
 
 		// get GPos and GTemp guides
 		gpos_cur.advect(mask, out);
-		QString g_pos2 = gpos_cur.getGuide(i);
+        fs::path pos_cur = fs::absolute(m_io.exportGuide(s, i, gpos_cur));
 
 		gtemp.updateGuide(prevStylizedFrame, out, mask);
-		QString g_temp2 = gtemp.getGuide(i);
+        fs::path temp_cur = fs::absolute(m_io.exportGuide(s, i, gtemp));
 
-		// get 3-digit frame number
-		QString prevframe = QString::number(beg).rightJustified(3, '0');
-		QString frame = QString::number(i).rightJustified(3, '0');
+        // get current frame of video
+        fs::path color_cur = fs::absolute(m_io.getInputPath(s, i));
 
 		// build command to call ebsynth
-
-		QString command("cd ./deps/ebsynth && bin/ebsynth -style ../../data/test/keys/" + keynum + ".jpg ");
-		command.append("-guide ../." + prevEdge + " ../." + g_edge2 + " -weight 0.5 ");
+        std::string command = m_io.getBinaryLocation().string() + " -style " + fs::absolute(s.keyframePath).string();
+        command += " -guide " + edge_initial.string() +  " " + edge_cur.string() + " -weight 0.5 ";
 
 		//        command.append("-guide " + g_mask1 + " " + g_mask2 + " -weight 6 ");
 
-		command.append("-guide ../../data/test/video/" + prevframe + ".jpg " + "../../data/test/video/" + frame + ".jpg -weight 6 ");
+        command+="-guide " + color_initial.string() +  " " + color_cur.string() + " -weight 6 ";
 
-		command.append("-guide ../." + prevPos + " ../." + g_pos2 + " -weight 2 ");
+        command+="-guide " + pos_initial.string() + " " + pos_cur.string() + " -weight 2 ";
 
-		command.append("-guide ../." + prevTemp + " ../." + g_temp2 + " -weight 0.5 ");
+        command+="-guide " + temp_initial.string() + " " + temp_cur.string() + " -weight 0.5 ";
 
-		QString prefix("outtest/" + QString::number(keyIdx) + "-" + frame );
+        command+=("-output " + fs::absolute(m_io.getOutputPath(s, i)).string());
 
-		QString outfile(prefix+".png");
-		command.append("-output ../../" + outfile);
+        command+=" -searchvoteiters 12 -patchmatchiters 6";
 
-		command.append(" -searchvoteiters 12 -patchmatchiters 6");
-
-		QByteArray ba = command.toLocal8Bit();
-		const char *c_str = ba.data();
-
+        const char *c_str = command.c_str();
 		// actually calls ebsynth executable
-		std::system(c_str);
-
-		prevStylizedFrame = std::make_shared<QImage>(outfile);
-
-		outpaths.push_back(outfile);
-		errorpaths.push_back(prefix + ".bin");
+        std::system(c_str);
+        QImage prevStylized;
+        Mat intermediate = cv::imread(fs::relative(m_io.getOutputPath(s, i)).string());
+        cv::cvtColor(intermediate, intermediate, cv::COLOR_BGR2RGB);
+        prevStylized = QImage(intermediate.data, intermediate.cols, intermediate.rows, intermediate.step, QImage::Format_RGB888).copy();
+        prevStylizedFrame = std::make_shared<QImage>(prevStylized);
 	}
-	return {outpaths,errorpaths};
 }
