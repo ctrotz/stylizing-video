@@ -12,15 +12,14 @@ using namespace cv;
 
 HistogramBlender::HistogramBlender() {}
 
-void HistogramBlender::blend(const std::vector<QString> &seqA,
-                 const std::vector<QString> &seqB,
+void HistogramBlender::blend(Sequence& a, Sequence& b,
                  const std::vector<Mat> &errMask,
                  std::vector<cv::Mat> &outBlend)
 {
-    for (uint i = 0; i < seqA.size(); ++i) {
+    for (uint i = 0; i <= a.size; i++) {
         // Read in images
-        Mat Oai = imread(seqA.at(i).toStdString(), cv::IMREAD_COLOR);
-        Mat Obi = imread(seqB.at(i).toStdString(), cv::IMREAD_COLOR);
+        Mat Oai = imread(IOHandler::getOutputPath(a, i + a.begFrame), cv::IMREAD_COLOR);
+        Mat Obi = imread(IOHandler::getOutputPath(b, i + a.begFrame), cv::IMREAD_COLOR);
 
         // Convert to Lab color space
         cvtColor(Oai, Oai, COLOR_BGR2Lab);

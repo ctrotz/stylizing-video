@@ -216,21 +216,16 @@ fs::path IOHandler::getInputPath(Sequence &s, int frameNum)
 
 fs::path IOHandler::getOutputPath(Sequence &s, int frameNum)
 {
-   assert(frameNum >= _begFrame && frameNum <= _endFrame);
    fs::path frame = s.outputDir;
-   int padSize = calcNumDigits(_inputFrameNums.size());
-
-   frame /= QString::number(frameNum).rightJustified(padSize, '0').toStdString()  + ".jpg";
+   frame /= QString::number(frameNum).rightJustified(s.numDigits, '0').toStdString()  + ".jpg";
 
    return frame;
 }
 
 fs::path IOHandler::getErrorPath(Sequence &s, int frameNum)
 {
-    assert(frameNum >= _begFrame && frameNum <= _endFrame);
     fs::path error = s.outputDir;
-    int padSize = calcNumDigits(_inputFrameNums.size());
-    error /=  QString::number(frameNum).rightJustified(padSize, '0').toStdString() + ".bin";
+    error /=  QString::number(frameNum).rightJustified(s.numDigits, '0').toStdString() + ".bin";
 
     return error;
 }
@@ -288,6 +283,7 @@ Sequence IOHandler::makeSequence(int begFrame, int endFrame, int step, int keyfr
     s.step = step;
     s.keyframeIdx = keyframeIdx;
     s.numDigits = padSize;
+    s.size = std::abs(begFrame - endFrame);
 
     return s;
 }
