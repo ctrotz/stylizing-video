@@ -37,17 +37,19 @@ void Stylizer::run(){
     for (uint i = 0; i < m_keys.size(); i++){
         seqs = m_io.getSequences(i);
         m_seqs.insert(m_seqs.end(), seqs.begin(), seqs.end());
+//        std::cout << m_seqs.size() << std::endl;
     }
     Sequence cur;
     for (uint i = 0; i < m_seqs.size(); i++) {
         cur = m_seqs.at(i);
-        //generateGuides(m_keys.at(cur.keyframeIdx), cur);
+//        generateGuides(m_keys.at(cur.keyframeIdx), cur);
     }
     if (m_keys.size() == 1) {
         return;
     }
     int i = 0;
     Sequence a, b;
+//    std::cout << m_seqs.size() << std::endl;
     while (i < m_seqs.size()) {
         if ((i < m_seqs.size() - 1 && m_seqs.at(i).step == m_seqs.at(i + 1).step) || i == m_seqs.size() - 1) {
             i++;
@@ -55,10 +57,18 @@ void Stylizer::run(){
         }
         a = m_seqs.at(i);
         b = m_seqs.at(i + 1);
+//        std::cout << a.step << b.step << a.begFrame << b.endFrame << std::endl;
+
         assert(a.step != b.step && a.begFrame == b.endFrame && a.endFrame == b.begFrame);
+
         copyKeyframes(a, b);
+
 		std::vector<cv::Mat> masks = createMasks(a, b);
+        std::cout << masks.size() << std::endl;
+
 		std::vector<cv::Mat> final_masks = tempCoherence(masks);
+        std::cout << i << std::endl;
+
 
 		// histogram-preserving blend
 		std::vector<cv::Mat> outBlend;
@@ -122,7 +132,7 @@ std::vector<cv::Mat> Stylizer::tempCoherence(std::vector<cv::Mat> masks){
 		if (GENERATE) {
 			flowField = m_advects[i-1];
 		} else {
-            flowField = deserializeMatbin(m_io.getFlowPath(i));
+            flowField = deserializeMatbin(m_io.getFlowPath(i+1));
 		}
 		Mat advected(size, CV_8UC1);
 		advector.advectMask(flowField, prevMask, advected);
@@ -221,6 +231,7 @@ void Stylizer::generateGuides(shared_ptr<QImage> keyframe, Sequence& s) {
 		cvtColor(i2, i2, COLOR_BGRA2BGR);
 
 		Mat2f out = calculateFlow(i1, i2, false, false);
+        cv::patchNaNs(out, 0);
 
 		// if running through whole pipeline, store advection field
         if (s.step > 0) {

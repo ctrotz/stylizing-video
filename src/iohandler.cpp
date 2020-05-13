@@ -240,6 +240,7 @@ fs::path IOHandler::getErrorPath(Sequence &s, int frameNum)
 
 fs::path IOHandler::getFlowPath(int frameNum)
 {
+    std::cout << "frameNum " << frameNum << std::endl;
     fs::path flow = _outputDir;
     int padSize = calcNumDigits(_inputFrameNums.size());
     flow /= QString::number(frameNum).rightJustified(padSize, '0').toStdString() + ".matbin";
@@ -304,6 +305,7 @@ std::vector<Sequence> IOHandler::getSequences(int keyframeIdx) {
 	}
 
     int keyframeNum = _keyframeNums.at(keyframeIdx);
+//    std::cout << keyframeNum << _begFrame << std::endl;
     if (keyframeNum == _begFrame) {
 		if (_keyframeNums.size() == 1) {
             return std::vector<Sequence>({makeSequence(_begFrame, _endFrame, 1, keyframeIdx)});
@@ -321,6 +323,7 @@ std::vector<Sequence> IOHandler::getSequences(int keyframeIdx) {
                   return std::vector<Sequence>({makeSequence(keyframeNum, _begFrame, -1, keyframeIdx),
                                                                     makeSequence(keyframeNum, _endFrame, 1, keyframeIdx)});
              } else if (keyframeIdx == 0) {
+//                std::cout << "hi" << std::endl;
                 return std::vector<Sequence>({makeSequence(keyframeNum, _begFrame, -1, keyframeIdx),
                                                                   makeSequence(keyframeNum, _keyframeNums.at(keyframeIdx + 1), 1, keyframeIdx)});
              } else if (keyframeIdx == _keyframeNums.size() - 1) {

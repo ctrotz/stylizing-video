@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
 //    QCommandLineOption createKey("create_key", "Specifies additional frames to stylize as key frames.", "frame");
 //    parser.addOption(createKey);
-//    parser.process(a);
+    parser.process(a);
 
     const QStringList args = parser.positionalArguments();
     if((args.size() != 3) && (args.size() != 5)) {
@@ -74,22 +74,21 @@ int main(int argc, char *argv[])
 
     ioHandler.loadInputData(inputFrames, keyframes);
 
-    std::string extraKey = keyframeDir.toStdString() + QString::number(newKey).rightJustified(padSize, '0').toStdString()  + ".jpg";
+//    std::string extraKey = keyframeDir.toStdString() + QString::number(newKey).rightJustified(padSize, '0').toStdString()  + ".png";
 
-    std::string pythonCall = "source /Users/maggie/envs/cv/bin/activate && python style.py ";
-    pythonCall += inputDir.toStdString() + QString::number(newKey).rightJustified(padSize, '0').toStdString()  + ".png";
-    pythonCall += QString::fromStdString(ioHandler.getOneKey());
-    pythonCall += extraKey;
-    std::system(pythonCall.c_str());
+//    std::string pythonCall = "source /Users/maggie/envs/cv/bin/activate && python style.py ";
+//    pythonCall += inputDir.toStdString() + QString::number(newKey).rightJustified(padSize, '0').toStdString()  + ".png ";
+//    pythonCall += ioHandler.getOneKey();
+//    pythonCall += " ";
+//    pythonCall += extraKey;
+//    std::cout << pythonCall <<std::endl;
+//    std::system(pythonCall.c_str());
 
-    ioHandler.addKey(keyframes, extraKey);
+//    ioHandler.addKey(keyframes, extraKey);
 
     Stylizer style(inputFrames, keyframes, ioHandler);
-//    style.generateGuides();
     style.run();
     a.exit();
-
-
 }
 
 

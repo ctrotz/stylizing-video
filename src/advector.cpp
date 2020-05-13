@@ -17,14 +17,15 @@ void Advector::advect(const cv::Mat2f& flowField, std::shared_ptr<QImage> mask,
     int imgH = outFrame->height();
     int imgW = outFrame->width();
 
+    QRgb *scanline = (QRgb*)outFrame->scanLine(0);
+
     for (int r = 0; r < imgH; ++r) {
         for (int c = 0; c < imgW; ++c) {
             cv::Vec2f u = flowField.at<cv::Vec2f>(r, c);
-
             cv::Vec2f prevPos = cv::Vec2f({static_cast<float>(c), static_cast<float>(r)}) - u;
-
             QColor interpColor = bilinearInterpolate(inFrame, mask, prevPos);
             outFrame->setPixelColor(c, r, interpColor);
+            scanline[r*imgW + c] = interpColor.rgb();
         }
     }
 }
