@@ -39,7 +39,7 @@ void Stylizer::run(){
     Sequence cur;
     for (uint i = 0; i < m_seqs.size(); i++) {
         cur = m_seqs.at(i);
-//	generateGuides(m_keys.at(cur.keyframeIdx), cur);
+        generateGuides(m_keys.at(cur.keyframeIdx), cur);
     }
     if (m_keys.size() == 1) {
         return;
