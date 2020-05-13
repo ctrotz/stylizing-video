@@ -41,7 +41,6 @@ void Stylizer::run(){
     Sequence cur;
     for (uint i = 0; i < m_seqs.size(); i++) {
         cur = m_seqs.at(i);
-        //generateGuides(m_keys.at(cur.keyframeIdx), cur);
     }
     if (m_keys.size() == 1) {
         return;
@@ -122,7 +121,7 @@ std::vector<cv::Mat> Stylizer::tempCoherence(std::vector<cv::Mat> masks){
 		if (GENERATE) {
 			flowField = m_advects[i-1];
 		} else {
-            flowField = deserializeMatbin(m_io.getFlowPath(i));
+                        flowField = deserializeMatbin(m_io.getFlowPath(i));
 		}
 		Mat advected(size, CV_8UC1);
 		advector.advectMask(flowField, prevMask, advected);
