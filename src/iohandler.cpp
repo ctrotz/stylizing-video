@@ -140,11 +140,11 @@ void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,
     // Export all images
     for (uint i = 0; i < images.size(); ++i) {
 	fs::path filename = filenames.at(i);
-	filename.replace_extension(".jpg");
+    filename.replace_extension(".png");
 	outPath = outputDir;
-        outPath /= filename;
+    outPath /= filename;
 	std::cout << outPath << std::endl;
-	std::cout << images.at(i)->save(QString::fromStdString(outPath), "JPG") << " for image " << i << std::endl;
+    std::cout << images.at(i)->save(QString::fromStdString(outPath), "PNG") << " for image " << i << std::endl;
     }
 }
 
@@ -225,7 +225,7 @@ fs::path IOHandler::getInputPath(Sequence &s, int frameNum)
 fs::path IOHandler::getOutputPath(Sequence &s, int frameNum)
 {
    fs::path frame = s.outputDir;
-   frame /= QString::number(frameNum).rightJustified(s.numDigits, '0').toStdString()  + ".jpg";
+   frame /= QString::number(frameNum).rightJustified(s.numDigits, '0').toStdString()  + ".png";
 
    return frame;
 }
