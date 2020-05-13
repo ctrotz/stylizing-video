@@ -16,6 +16,7 @@ public:
     void convolve(std::vector<double> &GKernel, RGBA* data, int width, int height);
     void makeGray(RGBA *data, int width, int height);
     void updateFrame(std::shared_ptr<QImage> currFrame);
+    std::string getType() override;
 
     RGBA *getData(std::shared_ptr<QImage> image);
 
@@ -29,6 +30,7 @@ public:
     }
 
     QString getGuide(int i);
+    std::shared_ptr<QImage> getGuide() override;
 
 private:
     std::shared_ptr<QImage> m_guide;

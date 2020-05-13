@@ -1,64 +1,72 @@
 #include "iohandler.h"
 
 #include <iostream>
+#include <regex>
+#include <filesystem>
 
-#include <QDirIterator>
-
-IOHandler::IOHandler(int begFrame, int endFrame, QString inputFramesDir,
-                     QString keyframesDir, QString outputDir) :
+IOHandler::IOHandler(int begFrame, int endFrame, std::string inputFramesDir,
+                     std::string keyframesDir, std::string outputDir, std::string binaryLocation) :
     _begFrame(begFrame),
     _endFrame(endFrame),
     _inputFramesDir(inputFramesDir),
     _keyframesDir(keyframesDir),
-    _outputDir(outputDir)
+    _outputDir(outputDir),
+    _binaryLocation(binaryLocation)
 {
+    if (!fs::exists(_inputFramesDir) || !fs::exists(_keyframesDir)) {
+        throw std::invalid_argument("Non-existent input and/or keyframe directory and/or ebsynth binary.");
+    } else if  (!fs::exists(_binaryLocation) || _binaryLocation.stem() != "ebsynth") {
+        throw std::invalid_argument("Non-existent ebsynth binary.");
+    }
+
     collectImageFilepaths();
 }
 
 void IOHandler::collectImageFilepaths()
 {
     // Get filepaths for input frames
-    QDirIterator inputIt(_inputFramesDir);
-    while (inputIt.hasNext()) {
-        QString curPath = inputIt.next();
-        QString filename = curPath.section('/', -1);
-
-        if (isdigit(filename.toStdString()[0]) &&
-            (curPath.endsWith(".jpg") || curPath.endsWith(".jpeg") || curPath.endsWith(".png"))) {
-            int frameNum = std::stoi(filename.toStdString());
+    std::regex numberFiles = std::regex("^[0-9]*\\.(jpg|JPG|jpeg|JPEG|png|PNG)$");
+    fs::directory_iterator inputIt(_inputFramesDir);
+    for (fs::directory_entry const& entry : inputIt) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+        fs::path const& path = entry.path();
+        if (std::regex_match(path.filename().string(), numberFiles)) {
+            int frameNum = std::stoi(path.stem());
 
             // Check if within frame number range
             if (frameNum >= _begFrame && (_endFrame == -1 || frameNum <= _endFrame)) {
-                _inputFramePaths.push_back(curPath);
+                _inputFramePaths.push_back(path);
                 _inputFrameNums.push_back(frameNum);
             }
         }
     }
 
     // Get filepaths for keyframes
-    QDirIterator keyframesIt(_keyframesDir);
-    while (keyframesIt.hasNext()) {
-        QString curPath = keyframesIt.next();
-        QString filename = curPath.section('/', -1);
+    fs::directory_iterator keyframesIt(_keyframesDir);
+    for (fs::directory_entry const& entry : keyframesIt) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+        fs::path const& path = entry.path();
 
-        if (isdigit(filename.toStdString()[0]) &&
-            (curPath.endsWith(".jpg") || curPath.endsWith(".jpeg") || curPath.endsWith(".png"))) {
-            int frameNum = std::stoi(filename.toStdString());
+        if (std::regex_match(path.filename().string(), numberFiles)) {
+            int frameNum = std::stoi(path.stem());
 
             // Check if within frame number range
             if (frameNum >= _begFrame && (_endFrame == -1 || frameNum <= _endFrame)) {
-                _keyframePaths.push_back(curPath);
+                _keyframePaths.push_back(path);
                 _keyframeNums.push_back(frameNum);
             }
         }
     }
 
     auto sorter = 
-         [](const QString& s1, const QString& s2) {
-            std::string stdS1 = s1.toStdString();
-            std::string stdS2 = s2.toStdString();
-            return std::lexicographical_compare(stdS1.begin(), stdS1.end(),
-                                                stdS2.begin(), stdS2.end());
+         [](const fs::path& s1, const fs::path& s2) {
+        std::string s1stem = s1.stem();
+        std::string s2stem = s2.stem();
+            return std::lexicographical_compare(s1stem.begin(), s1stem.end(), s2stem.begin(), s2stem.end());
          };
 
     // Sort frames based on frame number
@@ -77,31 +85,30 @@ void IOHandler::loadInputData(std::vector<std::shared_ptr<QImage>>& inputFrames,
 		                      std::vector<std::shared_ptr<QImage>>& keyframes)
 {
     // Import input frames
-    for (QString inputFramePath : _inputFramePaths) {
-        inputFrames.push_back(std::shared_ptr<QImage>(new QImage(inputFramePath)));
+    for (fs::path& inputFramePath : _inputFramePaths) {
+        inputFrames.push_back(std::shared_ptr<QImage>(new QImage(QString::fromStdString(inputFramePath))));
     }
 
     // Import keyframes
-    for (QString keyframePath : _keyframePaths) {
-        keyframes.push_back(std::shared_ptr<QImage>(new QImage(keyframePath)));
+    for (fs::path& keyframePath : _keyframePaths) {
+        keyframes.push_back(std::shared_ptr<QImage>(new QImage(QString::fromStdString(keyframePath))));
     }
 }
 
 // Defaults to using the index of the image in "images" as the
 // the filename of the exported image.
 void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,
-                             const QDir outputDir)
+                             const fs::path outputDir)
 {
     int padSize = calcNumDigits(images.size());
 
-    std::vector<QString> filenames;
+    std::vector<fs::path> filenames;
 
     for (uint i = 0; i < images.size(); ++i) {
-        QString outPath = outputDir.path();
         QString filename = QString::number(i).rightJustified(padSize, '0');
         filename.append(".jpg");
 
-        filenames.push_back(filename);
+        filenames.push_back(fs::path(filename.toStdString()));
     }
 
     exportImages(images, outputDir, filenames);
@@ -109,8 +116,8 @@ void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,
 
 // General exporting method for images
 void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images, 
-                             const QDir outputDir,
-                             const std::vector<QString>& filenames)
+                             const fs::path outputDir,
+                             const std::vector<fs::path>& filenames)
 {
     if (images.size() != filenames.size()) {
         std::cerr << "Error: Number of images to export does not equal "
@@ -118,22 +125,18 @@ void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,
         return;
     }
 
-    if (!outputDir.exists()) {
-        outputDir.mkpath(".");
+    if (!fs::exists(outputDir)) {
+	    fs::create_directory(outputDir);
     }
-
+    fs::path outPath;
     // Export all images
     for (uint i = 0; i < images.size(); ++i) {
-        QString outPath = outputDir.path();
-        QString filename = filenames.at(i);
-
-		if (!filename.endsWith(".jpg") && !filename.endsWith(".jpeg")) {
-			filename.append(".jpg");
-		}
-
-        outPath = outPath.append("/").append(filename);
-	std::cout << outPath.toStdString() << std::endl;
-	std::cout << images.at(i)->save(outPath, "JPG") << " for image " << i << std::endl;
+	fs::path filename = filenames.at(i);
+	filename.replace_extension(".jpg");
+	outPath = outputDir;
+        outPath /= filename;
+	std::cout << outPath << std::endl;
+	std::cout << images.at(i)->save(QString::fromStdString(outPath), "JPG") << " for image " << i << std::endl;
     }
 }
 
@@ -146,7 +149,7 @@ void IOHandler::exportAllFrames(const std::vector<std::shared_ptr<QImage>>& imag
 
 // This function is meant for exporting the same number of images as input frames,
 // using the names/numbers of these frames as the filenames of the exported images.
-void IOHandler::exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images, const QDir outputDir)
+void IOHandler::exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images, const fs::path outputDir)
 {
     if (images.size() != _inputFrameNums.size()) {
         std::cerr << "Error: Number of images to export does "
@@ -154,24 +157,17 @@ void IOHandler::exportAllFrames(const std::vector<std::shared_ptr<QImage>>& imag
         return;
     }
 
-    // Make output directory if it doesn't exist
-    if (!outputDir.exists()) {
-        outputDir.mkpath(".");
-    }
-
     int padSize = calcNumDigits(images.size());
 
-    std::vector<QString> filenames;
+    std::vector<fs::path> filenames;
 
     // Export all images
     for (uint i = 0; i < images.size(); ++i) {
-        QString outPath = outputDir.path();
         QString filename = QString::number(_inputFrameNums.at(i)).rightJustified(padSize, '0');
         filename.append(".jpg");
 
-        filenames.push_back(filename);
+        filenames.push_back(fs::path(filename.toStdString()));
     }
-
     exportImages(images, outputDir, filenames);
 }
 
@@ -199,6 +195,55 @@ std::vector<int> IOHandler::getKeyframeNums()
     return _keyframeNums;
 }
 
+fs::path IOHandler::exportGuide(Sequence &s, int frameNum, Guide &g)
+{
+    assert(frameNum >= _begFrame && frameNum <= _endFrame);
+    fs::path guide = s.guideDir;
+    if (!fs::exists(guide)) {
+        fs::create_directory(guide);
+    }
+    int padSize = calcNumDigits(_inputFrameNums.size());
+    guide /= g.getType() + QString::number(frameNum).rightJustified(padSize, '0').toStdString()  + ".jpg";
+    g.getGuide()->save(QString::fromStdString(guide), "JPG");
+    return guide;
+}
+
+fs::path IOHandler::getInputPath(Sequence &s, int frameNum)
+{
+    assert(frameNum >= _begFrame && frameNum <= _endFrame);
+    return  _inputFramePaths.at(frameNum - _begFrame);
+}
+
+fs::path IOHandler::getOutputPath(Sequence &s, int frameNum)
+{
+   assert(frameNum >= _begFrame && frameNum <= _endFrame);
+   fs::path frame = s.outputDir;
+   int padSize = calcNumDigits(_inputFrameNums.size());
+
+   frame /= QString::number(frameNum).rightJustified(padSize, '0').toStdString()  + ".jpg";
+
+   return frame;
+}
+
+fs::path IOHandler::getErrorPath(Sequence &s, int frameNum)
+{
+    assert(frameNum >= _begFrame && frameNum <= _endFrame);
+    fs::path error = s.outputDir;
+    int padSize = calcNumDigits(_inputFrameNums.size());
+    error /=  QString::number(frameNum).rightJustified(padSize, '0').toStdString() + ".bin";
+
+    return error;
+}
+
+fs::path IOHandler::getFlowPath(int frameNum)
+{
+    fs::path flow = _outputDir;
+    int padSize = calcNumDigits(_inputFrameNums.size());
+    flow /= QString::number(frameNum).rightJustified(padSize, '0').toStdString() + ".matbin";
+
+    return flow;
+}
+
 // Calculates the number of digits needed to represent a number in base 10.
 // Useful for the naming of exported image files.
 int IOHandler::calcNumDigits(int num)
@@ -210,6 +255,78 @@ int IOHandler::calcNumDigits(int num)
            (num < 1000000 ? 6 :
            (num < 10000000 ? 7 :
            (num < 100000000 ? 8 :
-           (num < 1000000000 ? 9 : 10))))))));
+                              (num < 1000000000 ? 9 : 10))))))));
 }
+
+fs::path IOHandler::getBinaryLocation() const
+{
+    return _binaryLocation;
+}
+
+// Forms Sequence struct from instance variables + sequence parameters
+Sequence IOHandler::makeSequence(int begFrame, int endFrame, int step, int keyframeIdx)
+{
+    Sequence s;
+    s.begFrame = begFrame;
+    s.endFrame = endFrame;
+    int keyframeNum = getKeyframeNum(keyframeIdx);
+
+    s.outputDir = _outputDir;
+    int padSize = calcNumDigits(_inputFrameNums.size());
+    s.outputDir /= QString::number(keyframeNum).rightJustified(padSize, '0').toStdString();
+
+    if (!fs::exists(s.outputDir)) {
+        fs::create_directory(s.outputDir);
+    }
+    s.guideDir = s.outputDir;
+    s.guideDir /= "guides";
+    if (!fs::exists(s.guideDir)) {
+        fs::create_directory(s.guideDir);
+    }
+
+    s.keyframePath = _keyframePaths.at(keyframeIdx);
+    s.step = step;
+    s.keyframeIdx = keyframeIdx;
+    s.numDigits = padSize;
+
+    return s;
+}
+
+// Calculates sequences to be stylized by a certain keyframe
+std::vector<Sequence> IOHandler::getSequences(int keyframeIdx) {
+    if (keyframeIdx >= _keyframeNums.size() || keyframeIdx < 0) {
+        std::cerr << "Error: Keyframe index out of range" << std::endl;
+        return std::vector<Sequence>();
+	}
+
+    int keyframeNum = _keyframeNums.at(keyframeIdx);
+    if (keyframeNum == _begFrame) {
+		if (_keyframeNums.size() == 1) {
+            return std::vector<Sequence>({makeSequence(_begFrame, _endFrame, 1, keyframeIdx)});
+		} else {
+            return std::vector<Sequence>({makeSequence(_begFrame, _keyframeNums.at(keyframeIdx + 1), 1, keyframeIdx)});
+		}
+    } else if (keyframeNum == _endFrame) {
+		if (_keyframeNums.size() == 1) {
+            return std::vector<Sequence>({makeSequence(_endFrame, _begFrame, -1, keyframeIdx)});
+        } else {
+            return std::vector<Sequence>({makeSequence(_endFrame, _keyframeNums.at(keyframeIdx - 1), -1, keyframeIdx)});
+        }
+    } else {
+            if (_keyframeNums.size() == 1) {
+                  return std::vector<Sequence>({makeSequence(keyframeNum, _begFrame, -1, keyframeIdx),
+                                                                    makeSequence(keyframeNum, _endFrame, 1, keyframeIdx)});
+             } else if (keyframeIdx == 0) {
+                return std::vector<Sequence>({makeSequence(keyframeNum, _begFrame, -1, keyframeIdx),
+                                                                  makeSequence(keyframeNum, _keyframeNums.at(keyframeIdx + 1), 1, keyframeIdx)});
+             } else if (keyframeIdx == _keyframeNums.size() - 1) {
+                return std::vector<Sequence>({makeSequence(keyframeNum, _keyframeNums.at(keyframeIdx - 1), -1, keyframeIdx),
+                                                                  makeSequence(keyframeNum, _endFrame, 1, keyframeIdx)});
+            } else {
+                return std::vector<Sequence>({makeSequence(keyframeNum, _keyframeNums.at(keyframeIdx - 1), -1, keyframeIdx),
+                                                                  makeSequence(keyframeNum, _keyframeNums.at(keyframeIdx + 1), 1, keyframeIdx)});
+            }
+        }
+}
+
 

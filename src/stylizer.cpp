@@ -9,6 +9,8 @@
 #include "gradientblend.h"
 #include "fft_fsolver.h"
 #include <iostream>
+#include <QDebug>
+#include <QFileInfo>
 #define GENERATE false
 
 using namespace std;
@@ -29,8 +31,17 @@ void Stylizer::run(){
 	HistogramBlender hb;
 	GradientBlender gb;
 
-	for (uint i = 0; i < m_keys.size()-1; i++){
-		// store key paths to pass into histogram blender
+    // Load in all Sequences, generate them, and then blend
+    std::vector<Sequence> seqs;
+    for (uint i = 0; i < m_keys.size(); i++){
+        seqs = m_io.getSequences(i);
+        m_seqs.insert(m_seqs.end(), seqs.begin(), seqs.end());
+    }
+    Sequence cur;
+    for (uint i = 0; i < m_seqs.size(); i++) {
+        cur = m_seqs.at(i);
+        generateGuides(m_keys.at(cur.keyframeIdx), cur);
+    }/**
 		int keyNum_a =  m_io.getKeyframeNum(i);
 		QString keynum_a = QString::number(keyNum_a).rightJustified(3, '0');
 		QString key_a("./data/test/keys/" + keynum_a + ".jpg");
@@ -94,7 +105,7 @@ void Stylizer::run(){
 		}	
 		m_io.exportAllFrames(output);
 
-	}
+    }*/
 }
 
 void Stylizer::poissonBlend(std::vector<cv::Mat> &hp_blends, const std::vector<cv::Mat3f> &gradX, const std::vector<cv::Mat3f> &gradY, std::vector<cv::Mat> &final_blends) {
@@ -177,7 +188,7 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::fetchGuides(int 
 		QString frame = QString::number(i).rightJustified(3, '0');
 		QString prefix("outtest/" + QString::number(keyIdx) + "-" + frame );
 		QString outfile(prefix+".png");
-		outpaths.push_back(outfile);
+        outpaths.push_back(outfile);
 		errorpaths.push_back(prefix + ".bin");
 	}
 	return {outpaths,errorpaths};
@@ -217,48 +228,38 @@ std::vector<float> Stylizer::loadError(QString& binary) {
 	return out;
 }
 
-std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(shared_ptr<QImage> keyframe, int keyIdx, int beg, int end, int step) {
-	// paths for stylized frames
-	std::vector<QString> outpaths;
-	outpaths.reserve(abs(end-beg) + 1);
-	// paths for binary files containing patch errors
-	std::vector<QString> errorpaths;
-	errorpaths.reserve(abs(end-beg) + 1);
-
-	QString prevEdge;
-
+void Stylizer::generateGuides(shared_ptr<QImage> keyframe, Sequence& s) {
 	std::shared_ptr<QImage> key(new QImage(*keyframe));
-	std::shared_ptr<QImage> mask(new QImage(*m_frames.at(beg)));
-	std::shared_ptr<QImage> frame1(new QImage(*m_frames.at(beg)));
+    std::shared_ptr<QImage> mask(new QImage(*m_frames.at(s.begFrame)));
+    std::shared_ptr<QImage> frame1(new QImage(*m_frames.at(s.begFrame)));
 
 	// get initial GEdge guide
 	GEdge edge(frame1);
-	prevEdge = edge.getGuide(beg);
+    fs::path edge_initial = fs::absolute(m_io.exportGuide(s, 0, edge));
 
 	// filler mask for advection
 	mask->fill(Qt::white);
 	GPos gpos_start = GPos(mask);
+    fs::path pos_initial = fs::absolute(m_io.exportGuide(s, 0, gpos_start));
 	GPos gpos_cur = gpos_start;
-	// get initial GPos guide
-	QString prevPos = gpos_cur.getGuide(beg);
-
 	Mat i1, i2;
 
 	// use keyframe as initial previously stylized frame
-	int keyNum =  m_io.getKeyframeNum(keyIdx);
-	QString keynum = QString::number(keyNum).rightJustified(3, '0');
-	QString prevTemp("./data/test/keys/" + keynum + ".jpg");
+    fs::path temp_initial = fs::absolute(s.keyframePath);
 	std::shared_ptr<QImage> prevStylizedFrame(new QImage(*key));
 	GTemp gtemp;
 
+    // initial frame of video
+    fs::path color_initial = fs::absolute(m_io.getInputPath(s, 0));
+
 	// going either forwards or backwards depending on keyframe
-	for (int i = beg+step; i != end; i+=step){
-		std::shared_ptr<QImage> frame2(new QImage(*m_frames.at(i)));
+    for (int i = s.begFrame+s.step; i != s.endFrame; i+=s.step){
+        std::shared_ptr<QImage> cur_frame(new QImage(*m_frames.at(i)));
 
-		edge.updateFrame(frame2);
-		QString g_edge2 = edge.getGuide(i);
+        edge.updateFrame(cur_frame);
+        fs::path edge_cur = fs::absolute(m_io.exportGuide(s, i, edge));
 
-		i1 = qimage_to_mat_ref((*m_frames.at(i-step)));
+        i1 = qimage_to_mat_ref((*m_frames.at(i-s.step)));
 		i2 = qimage_to_mat_ref((*m_frames.at(i)));
 
 		cvtColor(i1, i1, COLOR_BGRA2BGR);
@@ -267,51 +268,44 @@ std::pair<std::vector<QString>, std::vector<QString>> Stylizer::generateGuides(s
 		Mat2f out = calculateFlow(i1, i2, false, false);
 
 		// if running through whole pipeline, store advection field
-		if (step > 0){
+        if (s.step > 0) {
 			m_advects.push_back(out);
 		}
 
 		// get GPos and GTemp guides
 		gpos_cur.advect(mask, out);
-		QString g_pos2 = gpos_cur.getGuide(i);
+        fs::path pos_cur = fs::absolute(m_io.exportGuide(s, i, gpos_cur));
 
 		gtemp.updateGuide(prevStylizedFrame, out, mask);
-		QString g_temp2 = gtemp.getGuide(i);
+        fs::path temp_cur = fs::absolute(m_io.exportGuide(s, i, gtemp));
 
-		// get 3-digit frame number
-		QString prevframe = QString::number(beg).rightJustified(3, '0');
-		QString frame = QString::number(i).rightJustified(3, '0');
+        // get current frame of video
+        fs::path color_cur = fs::absolute(m_io.getInputPath(s, i));
 
 		// build command to call ebsynth
-
-		QString command("cd ./deps/ebsynth && bin/ebsynth -style ../../data/test/keys/" + keynum + ".jpg ");
-		command.append("-guide ../." + prevEdge + " ../." + g_edge2 + " -weight 0.5 ");
+        std::string command = m_io.getBinaryLocation().string() + " -style " + fs::absolute(s.keyframePath).string();
+        command += " -guide " + edge_initial.string() +  " " + edge_cur.string() + " -weight 0.5 ";
 
 		//        command.append("-guide " + g_mask1 + " " + g_mask2 + " -weight 6 ");
 
-		command.append("-guide ../../data/test/video/" + prevframe + ".jpg " + "../../data/test/video/" + frame + ".jpg -weight 6 ");
+        command+="-guide " + color_initial.string() +  " " + color_cur.string() + " -weight 6 ";
 
-		command.append("-guide ../." + prevPos + " ../." + g_pos2 + " -weight 2 ");
+        command+="-guide " + pos_initial.string() + " " + pos_cur.string() + " -weight 2 ";
 
-		command.append("-guide ../." + prevTemp + " ../." + g_temp2 + " -weight 0.5 ");
+        command+="-guide " + temp_initial.string() + " " + temp_cur.string() + " -weight 0.5 ";
 
-		QString prefix("outtest/" + QString::number(keyIdx) + "-" + frame );
+        command+=("-output " + fs::absolute(m_io.getOutputPath(s, i)).string());
 
-		QString outfile(prefix+".png");
-		command.append("-output ../../" + outfile);
+        command+=" -searchvoteiters 12 -patchmatchiters 6";
 
-		command.append(" -searchvoteiters 12 -patchmatchiters 6");
-
-		QByteArray ba = command.toLocal8Bit();
-		const char *c_str = ba.data();
+        const char *c_str = command.c_str();
 
 		// actually calls ebsynth executable
-		std::system(c_str);
-
-		prevStylizedFrame = std::make_shared<QImage>(outfile);
-
-		outpaths.push_back(outfile);
-		errorpaths.push_back(prefix + ".bin");
+        std::system(c_str);
+        QImage prevStylized;
+        Mat intermediate = cv::imread(fs::relative(m_io.getOutputPath(s, i)).string());
+        cv::cvtColor(intermediate, intermediate, cv::COLOR_BGR2RGB);
+        prevStylized = QImage(intermediate.data, intermediate.cols, intermediate.rows, intermediate.step, QImage::Format_RGB888).copy();
+        prevStylizedFrame = std::make_shared<QImage>(prevStylized);
 	}
-	return {outpaths,errorpaths};
 }

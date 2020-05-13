@@ -15,8 +15,9 @@ public:
     virtual ~GPos();
     static std::shared_ptr<QImage> generateGradient(int width, int height, QColor xColor = Qt::red, QColor yColor = Qt::green);
     void advect(std::shared_ptr<QImage> g_mask, cv::Mat2f& flowField);
-    std::shared_ptr<QImage> getGuide();
+    std::shared_ptr<QImage> getGuide() override;
     QString getGuide(int i);
+    std::string getType() override;
 
 private:
     std::shared_ptr<QImage> m_guide;

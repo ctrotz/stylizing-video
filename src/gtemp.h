@@ -15,7 +15,8 @@ public:
     GTemp(std::shared_ptr<QImage> prevStylizedFrame,
           cv::Mat& motionField,
           std::shared_ptr<QImage> mask);
-
+    std::string getType() override;
+    std::shared_ptr<QImage> getGuide() override;
     virtual ~GTemp();
 
     QString getGuide(int i);

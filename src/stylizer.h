@@ -14,7 +14,7 @@ class Stylizer {
 public:
     Stylizer(std::vector<std::shared_ptr<QImage>> inputFrames, std::vector<std::shared_ptr<QImage>> keyFrames, IOHandler &io);
     virtual ~Stylizer();
-    std::pair<std::vector<QString>, std::vector<QString>> generateGuides(std::shared_ptr<QImage> key, int keyIdx, int beg, int end, int step);
+    void generateGuides(std::shared_ptr<QImage> key, Sequence& s);
     std::pair<std::vector<QString>, std::vector<QString>> fetchGuides(int keyIdx, int beg, int end, int step);
     void run();
     std::vector<cv::Mat> createMasks(std::pair<std::vector<QString>, std::vector<QString>> a, std::pair<std::vector<QString>, std::vector<QString>> b);
@@ -24,6 +24,7 @@ private:
     std::vector<std::shared_ptr<QImage>> m_output;
     std::vector<cv::Mat2f> m_advects;
     std::vector<std::string> m_flowpaths;
+    std::vector<Sequence> m_seqs;
 
     IOHandler m_io;
 
