@@ -43,6 +43,8 @@ public:
     void exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images);
     void exportAllFrames(const std::vector<std::shared_ptr<QImage>>& images, const fs::path outputDir);
 
+    void addKey(std::vector<std::shared_ptr<QImage>>& keyframes, std::string newKey);
+
 	int getInputFrameNum(int frameIdx);
 	int getKeyframeNum(int keyframeIdx);
     std::vector<Sequence> getSequences(int keyframeIdx);
@@ -55,6 +57,7 @@ public:
 
     fs::path getInputPath(Sequence &s, int frameNum);
     fs::path getBinaryLocation() const;
+    fs::path getOneKey();
 
 private:
     void collectImageFilepaths();

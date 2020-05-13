@@ -95,6 +95,14 @@ void IOHandler::loadInputData(std::vector<std::shared_ptr<QImage>>& inputFrames,
     }
 }
 
+fs::path IOHandler::getOneKey(){
+    return _keyframePaths.at(0);
+}
+
+void IOHandler::addKey(std::vector<std::shared_ptr<QImage>>& keyframes, std::string newKey){
+    keyframes.push_back(std::shared_ptr<QImage>(new QImage(QString::fromStdString(newKey))));
+}
+
 // Defaults to using the index of the image in "images" as the
 // the filename of the exported image.
 void IOHandler::exportImages(const std::vector<std::shared_ptr<QImage>>& images,

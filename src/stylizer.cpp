@@ -41,7 +41,8 @@ void Stylizer::run(){
     for (uint i = 0; i < m_seqs.size(); i++) {
         cur = m_seqs.at(i);
         generateGuides(m_keys.at(cur.keyframeIdx), cur);
-    }/**
+    }
+    /**
 		int keyNum_a =  m_io.getKeyframeNum(i);
 		QString keynum_a = QString::number(keyNum_a).rightJustified(3, '0');
 		QString key_a("./data/test/keys/" + keynum_a + ".jpg");

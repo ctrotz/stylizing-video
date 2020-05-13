@@ -43,6 +43,7 @@ compile_commands.json
 .clangd/
 
 output/
+guides/
 
 deps/opencv/
 deps/opencv_contrib/

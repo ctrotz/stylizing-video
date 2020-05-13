@@ -29,8 +29,10 @@ int main(int argc, char *argv[])
 
     QCommandLineOption binary("binary", "Specifies alternate EbSynth location.", "location", "deps/ebsynth/bin/ebsynth");
     parser.addOption(binary);
-    parser.process(a);
-//    std::system("cd deps/ebsynth");
+
+//    QCommandLineOption createKey("create_key", "Specifies additional frames to stylize as key frames.", "frame");
+//    parser.addOption(createKey);
+//    parser.process(a);
 
     const QStringList args = parser.positionalArguments();
     if((args.size() != 3) && (args.size() != 5)) {
@@ -50,8 +52,11 @@ int main(int argc, char *argv[])
         begFrame = args[3].toInt();
         endFrame = args[4].toInt();
     }
-   QString binaryLoc = parser.value(binary);
-
+    QString binaryLoc = parser.value(binary);
+//    QString toStyle = parser.value(createKey);
+//    int newKey = toStyle.toInt();
+    int newKey = 28;
+    int padSize = 3;
 
     // Check arguments' validity
     if (begFrame > endFrame) {
@@ -65,9 +70,19 @@ int main(int argc, char *argv[])
     vector<std::shared_ptr<QImage>> inputFrames;
     vector<std::shared_ptr<QImage>> keyframes;
 
-    vector<std::shared_ptr<QImage>> advectedFrames;
+//    vector<std::shared_ptr<QImage>> advectedFrames;
 
     ioHandler.loadInputData(inputFrames, keyframes);
+
+    std::string extraKey = keyframeDir.toStdString() + QString::number(newKey).rightJustified(padSize, '0').toStdString()  + ".jpg";
+
+    std::string pythonCall = "source /Users/maggie/envs/cv/bin/activate && python style.py ";
+    pythonCall += inputDir.toStdString() + QString::number(newKey).rightJustified(padSize, '0').toStdString()  + ".png";
+    pythonCall += QString::fromStdString(ioHandler.getOneKey());
+    pythonCall += extraKey;
+    std::system(pythonCall.c_str());
+
+    ioHandler.addKey(keyframes, extraKey);
 
     Stylizer style(inputFrames, keyframes, ioHandler);
 //    style.generateGuides();
