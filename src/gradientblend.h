@@ -2,12 +2,12 @@
 #define GRADIENTBLEND_H
 #include <QString>
 #include <opencv2/core.hpp>
+#include "iohandler.h"
 class GradientBlender
 {
 public:
 	GradientBlender();
-	void blend(const std::vector<QString> &seqA,
-		   const std::vector<QString> &seqB,
+    void blend(Sequence& a, Sequence& b,
 		   const std::vector<cv::Mat> &errMask,
 		   std::vector<cv::Mat3f> &outBlendX,
 		   std::vector<cv::Mat3f> &outBlendY);

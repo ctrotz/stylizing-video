@@ -11,16 +11,14 @@
 
 GradientBlender::GradientBlender() {}
 
-void GradientBlender::blend(const std::vector<QString> &seqA, const std::vector<QString> &seqB, const std::vector<cv::Mat> &errMask, std::vector<cv::Mat3f> &outBlendX, std::vector<cv::Mat3f> &outBlendY)
+void GradientBlender::blend(Sequence& a, Sequence& b, const std::vector<cv::Mat> &errMask, std::vector<cv::Mat3f> &outBlendX, std::vector<cv::Mat3f> &outBlendY)
 {
-	assert(seqA.size() == seqB.size());
-	assert(seqA.size() == errMask.size());
-	for (uint i = 0; i < seqA.size(); ++i) {
+    for (uint i = 0; i <= a.size; i++) {
 		// Read in imgs
-		cv::Mat Oai = imread(seqA.at(i).toStdString(), cv::IMREAD_COLOR);
-		cv::Mat Obi = imread(seqB.at(i).toStdString(), cv::IMREAD_COLOR);
+        cv::Mat Oai = imread(IOHandler::getOutputPath(a, i), cv::IMREAD_COLOR);
+        cv::Mat Obi = imread(IOHandler::getOutputPath(b, i), cv::IMREAD_COLOR);
 		
-        	assert(Oai.channels() == 3 && Obi.channels() == 3);
+        assert(Oai.channels() == 3 && Obi.channels() == 3);
 		cv::Mat3f gradXA, gradYA, gradXB, gradYB;
 		generateGradient(Oai, gradXA, gradYA);	
 		generateGradient(Obi, gradXB, gradYB);
