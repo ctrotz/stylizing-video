@@ -45,7 +45,7 @@ between images using SimpleFlow from opencv_contrib. We present below vector fie
 ![Cat vy in gray](https://media.giphy.com/media/mFl7l8vvtbO2cR3aw7/giphy.gif)
 ## Demo
 
-Please see ![here](https://www.youtube.com/watch?v=77BxiVeDPSI) for a demo of the final product, including an extension to neural style transfer-based keyframes.
+Please see [here](https://www.youtube.com/watch?v=77BxiVeDPSI) for a demo of the final product, including an extension to neural style transfer-based keyframes.
 ## Citations
 Ondřej Jamriška, Šárka Sochorová, Ondřej Texler, Michal Lukáč, Jakub Fišer, Jingwan Lu, Eli Shechtman, and Daniel Sýkora. 2019.
 Stylizing Video by Example.
