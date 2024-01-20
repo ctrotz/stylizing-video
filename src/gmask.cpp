@@ -5,6 +5,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/video/background_segm.hpp>
+#include "opencvutils.h"
 
 using namespace std;
 using namespace cv;
@@ -45,16 +46,7 @@ void GMask::setMask(std::shared_ptr<QImage> mask){
 void GMask::createMask(std::shared_ptr<QImage> currFrame, int i){
 
     // Detect edges
-    Mat mat;
-    switch (currFrame->format())
-    {
-    case QImage::Format_RGB32:
-        mat = Mat(currFrame->height(), currFrame->width(), CV_8UC4, (void*)currFrame->constBits(), currFrame->bytesPerLine());
-        cvtColor(mat, mat, COLOR_RGBA2RGB);
-        break;
-    default:
-        break;
-    }
+    Mat mat = qimage_to_mat_ref(*currFrame);
 
     // First, blur
     Mat blurMat(mat.size(), CV_8UC3);
@@ -124,4 +116,6 @@ void GMask::createMask(std::shared_ptr<QImage> currFrame, int i){
     mask.convertTo(mask,CV_8UC1,1);
     QImage imgIn = QImage(mask.data, mask.cols, mask.rows, static_cast<int>(mask.step), QImage::Format_Grayscale8);
     m_mask = make_shared<QImage>(imgIn);
+
+    imgIn.save("./imgIn.jpg");
 }

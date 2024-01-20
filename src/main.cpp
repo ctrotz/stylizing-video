@@ -9,6 +9,13 @@
 #include "stylizer.h"
 
 #include "iohandler.h"
+
+//#include "gedge.h"
+//#include "optical-flow/simpleflow.h"
+//#include "opencvutils.h"
+//#include "advector.h"
+//#include "gpos.h"
+
 #include "opencvutils.h"
 #include "advector.h"
 #include "gpos.h"
@@ -68,6 +75,12 @@ int main(int argc, char *argv[])
     vector<std::shared_ptr<QImage>> advectedFrames;
 
     ioHandler.loadInputData(inputFrames, keyframes);
+
+    GMask g_mask = GMask(inputFrames[10]);
+
+//    std::shared_ptr<QImage> currFrame(new QImage("./data/minitest/video/000.jpg"));
+
+//    GEdge guide(currFrame);
 
     Stylizer style(inputFrames, keyframes, ioHandler);
 //    style.generateGuides();
