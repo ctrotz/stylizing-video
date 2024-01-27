@@ -15,7 +15,7 @@ Clone our repository and run:
 
 ```sh
 git submodule update --init --recursive
-brew qt install opencv fftw
+brew install qt opencv fftw
 (cd deps/ebsynth && ./build-macos-cpu-only.sh)
 qmake
 make
