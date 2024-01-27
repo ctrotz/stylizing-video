@@ -11,10 +11,11 @@
 
 ### Mac Installation
 
-Clone our repository and run `git submodule update --init --recursive` to set up our EbSynth submodule.
+Clone our repository and run:
 
 ```sh
-brew install opencv fftw
+git submodule update --init --recursive
+brew qt install opencv fftw
 (cd deps/ebsynth && ./build-macos-cpu-only.sh)
 qmake
 make
