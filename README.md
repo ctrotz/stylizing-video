@@ -12,7 +12,7 @@ brew install qt@5 opencv@4 fftw
 # add corresponding INCLUDEPATH and LIBS to Stylization.pro
 (cd deps/ebsynth && ./build-macos-cpu_only.sh)
 qmake && make
-./Stylization
+./Stylization data/test/video data/test/out data/test/keys 0 99
 ```
 
 ## Usage
