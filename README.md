@@ -8,7 +8,7 @@ Clone our repository and run:
 
 ```sh
 git submodule update --init --recursive
-brew install qt@5 opencv@4 fftw@3
+brew install qt@5 opencv@4 fftw
 (cd deps/ebsynth && ./build-macos-cpu-only.sh)
 qmake && make
 ```
