@@ -2,23 +2,15 @@
 
 ## Installation
 
-### Requirements
-
-* Qt 5.2.0 or higher
-* [OpenCV 4.3.0](https://github.com/opencv/opencv/tree/4.3.0) + [opencv_contrib](https://github.com/opencv/opencv_contrib)
-* [FFTW 3.3.8 (or higher)](http://www.fftw.org/)
-* Mac: macOS 10.15 or higher, Xcode 11 with Command Line Tools
-
-### Mac Installation
+### macOS
 
 Clone our repository and run:
 
 ```sh
 git submodule update --init --recursive
-brew install qt opencv fftw
+brew install qt@5 opencv@4 fftw@3
 (cd deps/ebsynth && ./build-macos-cpu-only.sh)
-qmake
-make
+(qmake && make)
 ```
 
 ## Implementation
