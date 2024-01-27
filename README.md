@@ -13,32 +13,12 @@
 
 Clone our repository and run `git submodule update --init --recursive` to set up our EbSynth submodule.
 
-#### OpenCV
-
-Install both OpenCV 4.3.0 and opencv_contrib from source, making sure to link them at build time by passing in
-
 ```sh
-cmake -DOPENCV_EXTRA_MODULES_PATH=<opencv_contrib>/modules <opencv_source_directory>
+brew install opencv fftw
+(cd deps/ebsynth && ./build-macos-cpu-only.sh)
+qmake
+make
 ```
-
-These should be installed to `/usr/local` to link properly with this project.
-
-We recommend the following workflow:
-
-1. Clone both repositories to the `deps/` directory.
-2. Create a `build` directory in the cloned `opencv` repo and `cd` into it.
-3. Run 
-    ```sh
-    cmake -DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules ..
-    make -j4
-    make install
-    ```
-
-4. All set!
-
-#### Other dependencies
-
-Install FFTW using `brew install fftw` Next, `cd` to `deps/ebsynth` and run the appropriate build script (`./build-macos-cpu-only.sh`).
 
 ## Implementation
 
