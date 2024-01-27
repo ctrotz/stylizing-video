@@ -12,6 +12,25 @@ brew install qt@5 opencv@4 fftw
 # add corresponding INCLUDEPATH and LIBS to Stylization.pro
 (cd deps/ebsynth && ./build-macos-cpu_only.sh)
 qmake && make
+./Stylization
+```
+
+## Usage
+
+```
+Usage: ./Stylization [options] inputDir outputDir keyframeDir begFrame endFrame
+
+Options:
+  -h, --help           Displays help on commandline options.
+  --help-all           Displays help, including generic Qt options.
+  --binary <location>  Specifies alternate EbSynth location.
+
+Arguments:
+  inputDir             File path to directory with input frames
+  outputDir            File path to directory for output frames
+  keyframeDir          File path to directory with keyframes
+  begFrame             Optional first frame in sequence
+  endFrame             Optional last frame in sequence
 ```
 
 ## Implementation
